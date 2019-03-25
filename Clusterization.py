@@ -15,7 +15,7 @@ class clusterization:
         self.labels = labels
         self.n_clusters = n_clusters
         if measure is None:
-            self.measure = davies_bouldin.DB #let it be by default
+            self.measure = davies_bouldin.Index #let it be by default
         else:
             self.measure = measure
 
