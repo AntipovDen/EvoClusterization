@@ -27,6 +27,8 @@ def n_mins(arr, n):  # returns the indices of the n smallest elements in the arg
     return res_1 + sample(res_2, n - len(res_1))
 
 
+# TODO: minimize everything
+
 class GreedyAlgorithm:
     def __init__(self, clusterization, measure = None):
         self. clusterization = clusterization
@@ -40,7 +42,7 @@ class GreedyAlgorithm:
         while True:
             # candidates for the mutation
             centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
-            to_mutate = n_mins([i[1] for i in centroid_distances], mutation_rate)
+            to_mutate = n_mins([i for i in centroid_distances], mutation_rate)
             # mutation itself
             for point in to_mutate:
                 new_measure = self.clusterization.recalculated_measure(point, centroids_numbers[point])
