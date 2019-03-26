@@ -31,7 +31,7 @@ class Index(Measure):
     def find(self, X, labels, n_clusters):
         self.diameter = utils.find_diameter(X)
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         rows, colums = X.shape
         self.sums = [0 for _ in range(n_clusters)]
         minimum_dif_c = sys.float_info.max  # min dist in different clusters
@@ -56,13 +56,13 @@ class Index(Measure):
         for i in range(n_clusters):
             denominator[i] *= (2 / self.cluster_sizes[i])
 
-        return minimum_dif_c / max(denominator)
+        return -(minimum_dif_c / max(denominator))
 
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
         # prev_cluster_sizes = list(self.cluster_sizes)
         prev_centroids = np.copy(self.centroids)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, np.copy(labels))
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(np.copy(labels), n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         # update denominator
 
@@ -96,4 +96,4 @@ class Index(Measure):
                 self.centers[l][i] = self.centers[i][l]
 
         minimum_dif_c = np.amin(self.centers)
-        return minimum_dif_c / max(denominator)
+        return -(minimum_dif_c / max(denominator))

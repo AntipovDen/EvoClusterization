@@ -35,7 +35,7 @@ class Index(Measure):
         self.dists = [[0. for _ in range(len(labels))] for _ in range(len(labels))]
         self.sums = [0 for _ in range(n_clusters)]
         rows, colums = X.shape
-        self.point_in_c = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.point_in_c = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.delta_l = [[0.0] * n_clusters] * n_clusters
         self.delta = np.array(self.delta_l)
         self.centroid_dists = [0 for _ in range(len(labels))]
@@ -57,7 +57,7 @@ class Index(Measure):
                     minimum_dif_c = min(minimum_dif_c, self.delta[i][j])
             self.sums[i] *= (2 / self.point_in_c[i])
         print(max(self.sums))
-        return minimum_dif_c / max(self.sums)
+        return -(minimum_dif_c / max(self.sums))
 
 
     def update(self, X, n_clusters, labels, k, l, id):
@@ -108,4 +108,4 @@ class Index(Measure):
         for i in range(n_clusters):
             if self.point_in_c[i] != 0:
                 denominator[i] *= (2 / self.point_in_c[i])
-        return minimum_dif_c / max(denominator)
+        return -(minimum_dif_c / max(denominator))

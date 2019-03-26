@@ -30,7 +30,7 @@ class Index(Measure):
     def find(self, X, labels, n_clusters):
         self.diameter = utils.find_diameter(X)
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
 
         self.centroid_dists = [[sys.float_info.max for _ in range(n_clusters)] for _ in range(n_clusters)]
         self.dists = [[0 for _ in range(len(labels))] for _ in range(n_clusters)]
@@ -56,12 +56,12 @@ class Index(Measure):
             for i in range(0, len(max_n)):
                 acc += max_n[i]
             denominator += acc * 10.0 / self.cluster_sizes[k]
-        return numerator / denominator
+        return -(numerator / denominator)
 
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
         prev_centroids = np.copy(self.centroids)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         for i in range(n_clusters):
             if i > k:
@@ -88,6 +88,6 @@ class Index(Measure):
             for i in range(0, len(max_n)):
                 acc += max_n[i]
             denominator += acc * 10.0 / self.cluster_sizes[c]
-        return numerator / denominator
+        return -(numerator / denominator)
 
 

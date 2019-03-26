@@ -3,6 +3,7 @@ from numpy import partition, sum
 from random import sample
 from numpy.random import choice
 from math import ceil
+#import Clusterization.clusterization as cl
 
 # each algorithm takes some clusterization as an a input argument to the constructor
 # it also can take the measure of this clusterization as an a
@@ -30,7 +31,7 @@ class GreedyAlgorithm:
     def __init__(self, clusterization, measure = None):
         self. clusterization = clusterization
         if measure is None:
-            self.measure = clusterization.measure()
+            self.measure = 0
         else:
             self.measure = measure
 
@@ -54,7 +55,7 @@ class EvoOnePlusOne:
     def __init__(self, clusterization, measure = None):
         self. clusterization = clusterization
         if measure is None:
-            self.measure = clusterization.measure()
+            self.measure = 0
         else:
             self.measure = measure
 
@@ -63,6 +64,7 @@ class EvoOnePlusOne:
         start_time = time()
         while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
             # candidates for the mutation
+            print("start iteration")
             centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
             sum_of_distances = sum(1/i for i in centroid_distances)
             probabilities = [(1 / i) / sum_of_distances for i in centroid_distances]
@@ -76,6 +78,7 @@ class EvoOnePlusOne:
             elif new_measure > self.measure:
                 mutation_rate *= 2 ** 0.25
             self.measure = new_measure
+            print("Iteration " + str(self.measure))
         return self.measure
 
 

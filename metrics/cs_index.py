@@ -29,7 +29,7 @@ class Index(Measure):
         self.diameter = utils.find_diameter(X)
         elements, ignore_columns = X.shape
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
 
         self.dists = [[0 for _ in range(elements)] for _ in range(elements)]
 
@@ -62,7 +62,7 @@ class Index(Measure):
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
         elements, ignore_columns = X.shape
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids),
                                                            np.copy(self.cluster_sizes), point, k, l)
         for i in range(elements):

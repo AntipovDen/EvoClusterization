@@ -60,7 +60,7 @@ class Index(Measure):
     def find(self, X, labels, n_clusters):
         self.diameter = utils.find_diameter(X)
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.a_ss = [0 for _ in range(len(labels))]
         self.b_ss = [0 for _ in range(len(labels))]
         self.dists_e = [[0 for _ in range(len(labels))] for _ in range(len(labels))]
@@ -75,11 +75,11 @@ class Index(Measure):
         ch = 0
         for i in range(len(labels)):
             ch += (self.b_ss[i] - self.a_ss[i]) / max(self.b_ss[i], self.a_ss[i])
-        return ch / float(len(labels))
+        return -(ch / float(len(labels)))
 
 
     def update(self, X, n_clusters, labels, k, l, id):
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), X[id], k, l)
         self.a_ss[id] = self.a(X, labels, id, l)
         self.b_ss[id] = self.b(X, n_clusters, labels, id, l)
@@ -117,4 +117,4 @@ class Index(Measure):
         ch = 0
         for i in range(len(labels)):
             ch += (self.b_ss[i] - self.a_ss[i]) / max(self.b_ss[i], self.a_ss[i])
-        return ch / float(len(labels))
+        return -(ch / float(len(labels)))

@@ -33,7 +33,7 @@ class Index(Measure):
     def find(self, X, labels, n_clusters):
         self.diameter = utils.find_diameter(X)
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.numerators = [0.0] * n_clusters
         for i in range(0, len(labels)):
             self.numerators[labels[i]] += utils.euclidian_dist(X[i], self.centroids[labels[i]])
@@ -68,7 +68,7 @@ class Index(Measure):
 
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         self.numerators[k] = 0.0
         self.numerators[l] = 0.0

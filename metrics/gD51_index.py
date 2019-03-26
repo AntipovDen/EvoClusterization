@@ -36,7 +36,7 @@ class Index(Measure):
     def find(self, X, labels, n_clusters):
         self.diameter = utils.find_diameter(X)
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.dists = [[0 for _ in range(len(labels))] for _ in range(len(labels))]
         self.centroid_dists = [0 for _ in range(len(labels))]
         self.delta = [[0 for _ in range(n_clusters)] for _ in range(n_clusters)]
@@ -57,14 +57,14 @@ class Index(Measure):
                 if i != j:
                     self.delta[i][j] = (self.sums[i] + self.sums[j]) / float(self.cluster_sizes[i] + self.cluster_sizes[j])
                     minimum_dif_c = min(minimum_dif_c, self.delta[i][j])
-        return minimum_dif_c / maximum_same_c
+        return -(minimum_dif_c / maximum_same_c)
 
 
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
         prev_cluster_sizes = list(self.cluster_sizes)
         prev_centroids = np.copy(self.centroids)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         minimum_dif_c = sys.float_info.max  # min dist in different clusters
         maximum_same_c = sys.float_info.min  # max dist in the same cluster
@@ -112,5 +112,5 @@ class Index(Measure):
                 if i != j:
                     self.delta[i][j] = (new_sums[i] + new_sums[j]) / float(self.cluster_sizes[i] + self.cluster_sizes[j])
                     minimum_dif_c = min(minimum_dif_c, self.delta[i][j])
-        return minimum_dif_c / maximum_same_c
+        return -(minimum_dif_c / maximum_same_c)
 

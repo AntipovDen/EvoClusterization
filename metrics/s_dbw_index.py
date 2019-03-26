@@ -91,7 +91,7 @@ class Index(Measure):
         self.diameter = utils.find_diameter(X)
         self.sigmas = [0 for _ in range(n_clusters)]
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
 
         for k in range(0, n_clusters):
             self.sigmas[k] = self.normed_cluster_sigma(X, labels, k)
@@ -113,7 +113,7 @@ class Index(Measure):
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
         prev_centroids = np.copy(self.centroids)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         delta = 10**(-math.log(len(X), 10) - 1)
         if utils.euclidian_dist(prev_centroids[k], self.centroids[k]) > delta * self.diameter:

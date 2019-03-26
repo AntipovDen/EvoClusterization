@@ -41,10 +41,10 @@ class Index(Measure):
                 else:
                     self.dist_same_c.append([i, j])
                     maximum_same_c = max(self.dist[i][j], maximum_same_c)
-        return minimum_dif_c / maximum_same_c
+        return -(minimum_dif_c / maximum_same_c)
 
 
-    def update_dunn(self, X, n_clusters, labels, k, l, id):
+    def update(self, X, n_clusters, labels, k, l, id):
         minimum_dif_c = sys.float_info.max  # min self.dist in different clusters
         maximum_same_c = sys.float_info.min  # max self.dist in the same cluster
         delete_from_dif = []
@@ -73,7 +73,7 @@ class Index(Measure):
             if cur > maximum_same_c:
                 if pair not in delete_from_same:
                     maximum_same_c = cur
-        return minimum_dif_c / maximum_same_c
+        return -(minimum_dif_c / maximum_same_c)
 
 
 

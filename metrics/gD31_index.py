@@ -45,8 +45,11 @@ class Index(Measure):
 
     def update(self, X, n_clusters, labels, k, l, id):
         prev_cluster_sizes = list(self.cluster_sizes)
-        self.centroids, self.cluster_sizes = cluster_centroid.update_centroids(list(self.centroids), list(self.cluster_sizes),
+        self.centroids = cluster_centroid.update_centroids(list(self.centroids), list(self.cluster_sizes),
                                                                                X[id], k, l)
+
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
+
         minimum_dif_c = sys.float_info.max  # min dist in different clusters
         maximum_same_c = sys.float_info.min  # max dist in the same cluster
         delete_from_same = []

@@ -30,7 +30,7 @@ class Index(Measure):
     def find(self, X, labels, n_clusters):
         self.diameter = utils.find_diameter(X)
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.dist_same_c = []
         rows, colums = X.shape
         self.dists = [[0. for _ in range(rows)] for _ in range(rows)]
@@ -53,12 +53,12 @@ class Index(Measure):
                 else:
                     self.dist_same_c.append([i, j])
                     maximum_same_c = max(self.dists[i][j], maximum_same_c)
-        return minimum_dif_c / maximum_same_c
+        return -(minimum_dif_c / maximum_same_c)
 
 
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         maximum_same_c = sys.float_info.min  # max dist in the same cluster
         delete_from_same = []
@@ -89,5 +89,5 @@ class Index(Measure):
                 self.centers[i][l] = utils.euclidian_dist(self.centroids[i], self.centroids[l])
                 self.centers[l][i] = self.centers[i][l]
         minimum_dif_c = np.amin(self.centers)
-        return minimum_dif_c / maximum_same_c
+        return -(minimum_dif_c / maximum_same_c)
 

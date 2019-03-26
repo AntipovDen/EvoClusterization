@@ -33,7 +33,7 @@ class Index(Measure):
 
         ch = float(rows - n_clusters) / float(n_clusters - 1)
 
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.numerator = [0 for _ in range(n_clusters)]
         for i in range(0, n_clusters):
             self.numerator[i] = self.cluster_sizes[i] * utils.euclidian_dist(self.centroids[i], self.x_center)
@@ -43,14 +43,14 @@ class Index(Measure):
 
         ch *= sum(self.numerator)
         ch /= sum(self.denominator)
-        return ch
+        return -ch
 
 
     def update(self, X, n_clusters, labels, k, l, id):
         delta = 10**(-math.log(len(X), 10) - 1)
         point = X[id]
         prev_centroids = np.copy(self.centroids)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         #if 0 in self.cluster_sizes:
         #    print("!!! ", self.cluster_sizes)
@@ -66,4 +66,4 @@ class Index(Measure):
 
         ch *= sum(self.numerator)
         ch /= sum(self.denominator)
-        return ch
+        return -ch

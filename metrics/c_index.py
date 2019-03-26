@@ -41,7 +41,7 @@ class Index(Measure):
             for j in range(i + 1, rows):
                 if labels[i] == labels[j]:
                     self.s_c += utils.euclidian_dist(X[i], X[j])
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
 
         for k in range(0, n_clusters):
             self.n_w += self.cluster_sizes[k] * (self.cluster_sizes[k] - 1) / 2
@@ -62,7 +62,7 @@ class Index(Measure):
 
 
     def update(self, X, n_clusters, labels, k, l, id):
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes),
                                                                                  X[id], k, l)
         #self.cluster_sizes[k] -= 1

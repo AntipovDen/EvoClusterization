@@ -34,7 +34,7 @@ class Index(Measure):
         self.dist_centroids = [[0 for _ in range(n_clusters)] for _ in range(n_clusters)]
         self.dist_ps = [0 for _ in range(len(labels))]
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
 
         for k in range(0, n_clusters - 1):
             for l in range(k + 1, n_clusters):
@@ -43,13 +43,13 @@ class Index(Measure):
         for i in range(0, len(labels)):
             self.dist_ps[i] = utils.d_ps(X, labels, X[i], labels[i], self.centroids)
         denominator = sum(self.dist_ps)
-        return numerator / (denominator * n_clusters)
+        return -(numerator / (denominator * n_clusters))
 
 
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
         prev_centroids = np.copy(self.centroids)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         for i in range(n_clusters):
             if i > k:
@@ -63,4 +63,4 @@ class Index(Measure):
                or labels[i] == l and utils.euclidian_dist(prev_centroids[l], self.centroids[l]) > delta * self.diameter):
                 self.dist_ps[i] = utils.d_ps(X, labels, X[i], labels[i], self.centroids)
         denominator = sum(self.dist_ps)
-        return numerator / (denominator * n_clusters)
+        return -(numerator / (denominator * n_clusters))

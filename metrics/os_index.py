@@ -91,7 +91,7 @@ class Index(Measure):
             for i in range(0, len(max_n)):
                 acc += max_n[i]
             denominator += acc * 10.0 / self.cluster_sizes[k]
-        return numerator / denominator
+        return -(numerator / denominator)
 
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
@@ -162,7 +162,7 @@ class Index(Measure):
             # get sum of 0.1*|Ck| largest elements
             max_n = heapq.nlargest(int(math.ceil(0.1 * self.cluster_sizes[c])), self.dists[c])
             denominator += sum(max_n) * 10.0 / self.cluster_sizes[c]
-        return numerator / denominator
+        return -(numerator / denominator)
 
 
 

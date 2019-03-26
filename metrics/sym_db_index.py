@@ -46,7 +46,7 @@ class Index(Measure):
         self.fractions = [[0 for _ in range(n_clusters)] for _ in range(n_clusters)]
         self.centroids = cluster_centroid.cluster_centroid(X, labels, n_clusters)
         db = 0
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         for i in range(0, len(labels)):
             self.dist_ps[i] = utils.d_ps(X, labels, X[i], labels[i], self.centroids)
         for i in range(n_clusters):
@@ -66,7 +66,7 @@ class Index(Measure):
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
         prev_centroids = np.copy(self.centroids)
-        self.cluster_sizes = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.cluster_sizes), point, k, l)
         delta = 10**(-math.log(len(X), 10) - 1)
         for i in range(len(labels)):

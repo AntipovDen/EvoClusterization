@@ -10,6 +10,11 @@ import sys
 
 class clusterization:
 
+    X = []
+    labels = []
+    n_clusters = 0
+    #measure = davies_bouldin.Index
+
     def __init__(self, X, labels, n_clusters, measure = None):
         self.X = X
         self.labels = labels
@@ -19,11 +24,11 @@ class clusterization:
         else:
             self.measure = measure
 
-    def measure(self):
-        return self.measure()
+    def init_measure(self):
+        return self.measure.find(self.X, self.labels, self.n_clusters)
 
     def get_nearest_centroids(self):
-        row, column = self.X.shape()
+        row, column = self.X.shape
         centroids_numbers, centroid_distances = [], []
 
         for i in range(row):
@@ -43,7 +48,6 @@ class clusterization:
 
 
     def recalculated_measure(self, point_to_move, number_of_new_cluster):
-        m = self.measure()
-        return m.update(self.X, self.n_clusters, self.labels, self.labels[point_to_move], number_of_new_cluster, point_to_move)
+        return self.measure.update(self.X, self.n_clusters, self.labels, self.labels[point_to_move], number_of_new_cluster, point_to_move)
 
 
