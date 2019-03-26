@@ -55,8 +55,9 @@ labels = res.labels_
 print(labels)
 n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
 
+#c_index.Index(), ch_index.Index(), dunn_index.Index(),
 
-indicies = [c_index.Index(), ch_index.Index(), dunn_index.Index(),
+indicies = [
             davies_bouldin.Index(), gD53_index.Index(), sil_index.Index(),
             db.Index(), gD41.Index(), gD51.Index(), gD53.Index(),
             cs.Index(), dbs.Index(), sym.Index(), cop.Index(),

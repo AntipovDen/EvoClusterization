@@ -97,7 +97,8 @@ class Index(Measure):
         point = X[id]
         prev_centroids = np.copy(self.centroids)
         prev_cluster_sizes = list(self.cluster_sizes)
-        self.centroids, self.cluster_sizes = cluster_centroid.update_centroids(self.centroids, self.cluster_sizes, point, k, l)
+        self.centroids = cluster_centroid.update_centroids(self.centroids, self.cluster_sizes, point, k, l)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         prev_dists_for_b = list(self.dists_for_b)
         self.a_ss[id] = self.a(X, labels, id, l)
         self.b_ss[id] = self.b(X, labels, id, l)
