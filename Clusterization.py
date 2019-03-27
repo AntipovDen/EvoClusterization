@@ -15,7 +15,7 @@ class clusterization:
     n_clusters = 0
     #measure = davies_bouldin.Index
 
-    def __init__(self, X, labels, n_clusters, measure = None):
+    def __init__(self, X, labels, n_clusters, measure=None):
         self.X = X
         self.labels = labels
         self.n_clusters = n_clusters
@@ -46,8 +46,10 @@ class clusterization:
 
         return centroids_numbers, centroid_distances
 
-
     def recalculated_measure(self, point_to_move, number_of_new_cluster):
         return self.measure.update(self.X, self.n_clusters, self.labels, self.labels[point_to_move], number_of_new_cluster, point_to_move)
+
+    def copy(self):
+        return clusterization(self.X.copy(), self.labels.copy(), self.n_clusters, self.measure)
 
 
