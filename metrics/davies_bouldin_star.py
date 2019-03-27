@@ -51,7 +51,8 @@ class Index(Measure):
         point = X[id]
         prev_centroids = np.copy(self.centroids)
         delta = 10**(-math.log(len(X), 10) - 1)
-        self.centroids, self.cluster_sizes = cluster_centroid.update_centroids(self.centroids, self.cluster_sizes, point, k, l)
+        self.cluster_sizes = cluster_centroid.count_cluster_sizes(labels, n_clusters)
+        self.centroids = cluster_centroid.update_centroids(self.centroids, self.cluster_sizes, point, k, l)
         if utils.euclidian_dist(prev_centroids[k], self.centroids[k]) > delta * self.diameter:
             self.s_clusters[k] = self.s(X, k, self.cluster_sizes, labels, self.centroids)
         if utils.euclidian_dist(prev_centroids[l], self.centroids[l]) > delta * self.diameter:
