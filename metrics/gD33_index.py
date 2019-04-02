@@ -64,7 +64,7 @@ class Index(Measure):
         self.diameter = utils.find_diameter(X)
         prev_point_in_c = list(self.point_in_c)
         prev_centroids = np.copy(self.centroids)
-        self.point_in_c = cluster_centroid.count_cluster_sizes(n_clusters, labels)
+        self.point_in_c = cluster_centroid.count_cluster_sizes(labels, n_clusters)
         self.centroids = cluster_centroid.update_centroids(np.copy(self.centroids), np.copy(self.point_in_c), X[id], k, l)
         minimum_dif_c = sys.float_info.max  # min dist in different clusters
 

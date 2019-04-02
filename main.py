@@ -7,7 +7,6 @@ from sklearn.preprocessing import StandardScaler
 import metrics.ch_index as ch_index
 import metrics.dunn_index as dunn_index
 import metrics.davies_bouldin as davies_bouldin
-import metrics.gD53_index as gD53_index
 import metrics.sil_index as sil_index
 import metrics.c_index as c_index
 import metrics.davies_bouldin as db
@@ -55,14 +54,14 @@ labels = res.labels_
 print(labels)
 n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
 
-#c_index.Index(), ch_index.Index(), dunn_index.Index(),
+#
 
-indicies = [
-            davies_bouldin.Index(), gD53_index.Index(), sil_index.Index(),
+indicies = [gD33.Index(), gD43.Index(), gD31.Index(),
+            c_index.Index(), ch_index.Index(), dunn_index.Index(),
+            davies_bouldin.Index(), sil_index.Index(),
             db.Index(), gD41.Index(), gD51.Index(), gD53.Index(),
             cs.Index(), dbs.Index(), sym.Index(), cop.Index(),
-            sv.Index(), sdb.Index(), sdbw.Index(), os.Index(),
-            gD33.Index(), gD43.Index(), gD31.Index()]
+            sv.Index(), sdb.Index(), sdbw.Index(), os.Index()]
 
 i = 0
 for index in indicies:
@@ -70,5 +69,5 @@ for index in indicies:
     print("Index " + str(i))
     cl = clusterization(X1, labels, n_clusters, index)
     m = cl.init_measure()
-    gr = EvoOnePlusOne(cl)
+    gr = GreedyAlgorithm(cl) #EvoOnePlusOne(cl)
     print(gr.run())
