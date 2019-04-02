@@ -49,13 +49,22 @@ class clusterization:
     def recalculated_measure(self, point_to_move, number_of_new_cluster):
         return self.measure.update(self.X, self.n_clusters, self.labels, self.labels[point_to_move], number_of_new_cluster, point_to_move)
 
-    def recalculated_measure_C(self, point_to_move, number_of_new_cluster):
+    # recalculate without moving points
+    def recalculated_measure_C(self, points_to_move, clusters_to_move_to):
         labels_cp = self.labels[:]
-        return self.measure.update(self.X, self.n_clusters, labels_cp, self.labels[point_to_move], number_of_new_cluster, point_to_move)
+        measure = 0
 
-    def move_points(self, points_to_move, cluster_to_move_to):
-        for x in points_to_move:
-            self.labels[x] = cluster_to_move_to
+        for i in len(points_to_move):
+            point = points_to_move[i]
+            cluster = clusters_to_move_to[i]
+            measure = self.measure.update(self.X, self.n_clusters, labels_cp, labels_cp[point], cluster, point)
+
+        return measure
+
+    # move points
+    def move_points(self, points_to_move, clusters_to_move_to):
+        for i in len(points_to_move):
+            self.labels[points_to_move[i]] = clusters_to_move_to[i]
 
     def copy(self):
         return clusterization(self.X.copy(), self.labels.copy(), self.n_clusters, self.measure)
