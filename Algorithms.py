@@ -34,7 +34,7 @@ def n_mins(arr, n):  # returns the indices of the n smallest elements in the arg
     return res_1 + sample(res_2, n - len(res_1))
 
 
-# TODO: minimize everything
+# all measures are supposed to be minimized
 
 class GreedyAlgorithm:
     def __init__(self, clusterization, measure = None):
@@ -51,8 +51,7 @@ class GreedyAlgorithm:
             centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
             to_mutate = n_mins(centroid_distances, mutation_rate)
             # mutation itself
-            for point in to_mutate:
-                new_measure = self.clusterization.recalculated_measure(point, centroids_numbers[point])
+            new_measure = self.clusterization.recalculated_measure_C(to_mutate, centroids_numbers)
             if new_measure >= self.measure:
                 break
             self.measure = new_measure
@@ -83,15 +82,15 @@ class EvoOnePlusOne:
             # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
             to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
 
-            new_measure = self.clusterization.recalculate_measure(to_mutate, [centroids_numbers[point] for point in to_mutate])
+            new_measure = self.clusterization.recalculated_measure_C(to_mutate, [centroids_numbers[point] for point in to_mutate])
 
-            if new_measure > self.measure: # Not sure, but it seems if it is equal we should divide the rate as well
+            if new_measure > self.measure:
                 mutation_rate /= 2
             elif new_measure <= self.measure:
-                mutation_rate *= 2 ** 0.25
+                mutation_rate = min(mutation_rate * 2 ** 0.25, len(self.clusterization.labels) / 2)
                 self.measure = new_measure
                 self.clusterization.move_points(to_mutate, [centroids_numbers[point] for point in to_mutate])
-            self.measure = new_measure
+
             print("Iteration " + str(self.measure))
         return self.measure
 
@@ -105,11 +104,10 @@ class EvoOnePlusFour:
             self.measure = measure
 
     def mutation(self, mutation_rate):
-        # this function must create a copy of the clusterization, generate a mutation, calculate the change in the
+        # this function must generate a mutation, calculate the change in the
         # measure and return the new measure, the array of the moved points and the array of the clusters which
         # these points were moved to.
-        clusterization = self.clusterization.copy()
-        centroids_numbers, centroid_distances = clusterization.get_nearest_centroids()
+        centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
 
         # calculating the probabilities for the points to be moved
         sum_of_distances = sum(1 / i for i in centroid_distances)
@@ -117,8 +115,8 @@ class EvoOnePlusFour:
 
         # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
         to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
-        return clusterization.recalculate_measure(to_mutate, [centroids_numbers[point] for point in to_mutate]), \
-               to_mutate, [centroids_numbers[point] for point in to_mutate]
+        return self.clusterization.recalculated_measure_C(to_mutate, [centroids_numbers[point] for point in to_mutate]), to_mutate, [centroids_numbers[point] for point in to_mutate]
+        # Notice: clusterization.recalculated_measure_C must not change anything in the clusterization or its measure!
 
     def run(self):
         start_time = time()
