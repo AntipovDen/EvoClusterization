@@ -63,7 +63,7 @@ class Index(Measure):
                     self.outer_min_dists[c][i] = inner_max_dist
             outer_min_dist = np.amin(self.outer_min_dists[c])
             self.accumulator[c] = self.numerators[c] / outer_min_dist
-        return -sum(self.accumulator) / len(labels)
+        return sum(self.accumulator) / len(labels)
 
 
     def update(self, X, n_clusters, labels, k, l, id):
@@ -96,4 +96,4 @@ class Index(Measure):
                     self.outer_min_dists[c][i] = inner_max_dist
             outer_min_dist = np.amin(self.outer_min_dists[c])
             self.accumulator[c] = self.numerators[c] / outer_min_dist
-        return -sum(self.accumulator) / len(labels)
+        return sum(self.accumulator) / len(labels)

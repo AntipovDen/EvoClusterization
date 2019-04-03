@@ -58,7 +58,7 @@ class Index(Measure):
         #s_max_c = np.dot(self.s_max, np.transpose(ones))
         s_min_c = sum(self.s_min)
         s_max_c = sum(self.s_max)
-        return -(self.s_c - s_min_c) / (s_max_c - s_min_c)
+        return (self.s_c - s_min_c) / (s_max_c - s_min_c)
 
 
     def update(self, X, n_clusters, labels, k, l, id):
@@ -90,5 +90,5 @@ class Index(Measure):
         #s_max_c = np.dot(self.s_max, np.transpose(ones))
         s_min_c = sum(self.s_min)
         s_max_c = sum(self.s_max)
-        return -(self.s_c - s_min_c) / (s_max_c - s_min_c)
+        return (self.s_c - s_min_c) / (s_max_c - s_min_c)
 

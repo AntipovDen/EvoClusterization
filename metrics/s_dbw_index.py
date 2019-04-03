@@ -107,7 +107,7 @@ class Index(Measure):
                                 self.den1(X, labels, self.centroids, l, stdev_val))
 
         self.dens /= n_clusters * (n_clusters - 1)
-        return -(term1 + self.dens)
+        return (term1 + self.dens)
 
 
     def update(self, X, n_clusters, labels, k, l, id):
@@ -133,4 +133,4 @@ class Index(Measure):
                                 self.den1(X, labels, self.centroids, l, stdev_val))
 
         self.dens /= n_clusters * (n_clusters - 1)
-        return -(term1 + self.dens)
+        return (term1 + self.dens)

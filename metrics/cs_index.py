@@ -57,7 +57,7 @@ class Index(Measure):
             min_centroid_dist = np.amin(self.centroids_dist[i])
             denominator += min_centroid_dist
 
-        return -numerator / denominator
+        return numerator / denominator
 
     def update(self, X, n_clusters, labels, k, l, id):
         point = X[id]
@@ -91,5 +91,5 @@ class Index(Measure):
             min_centroid_dist = np.amin(self.centroids_dist[i])
             denominator += min_centroid_dist
 
-        return -numerator / denominator
+        return numerator / denominator
 

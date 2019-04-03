@@ -60,7 +60,7 @@ class Index(Measure):
             max_fraction = np.amax(self.fractions[k])
             db += max_fraction
         db /= float(n_clusters)
-        return -db
+        return db
 
 
     def update(self, X, n_clusters, labels, k, l, id):
@@ -91,4 +91,4 @@ class Index(Measure):
             tmp = np.amax(self.fractions[i])
             db += tmp
         db /= float(n_clusters)
-        return -db
+        return db
