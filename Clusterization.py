@@ -54,7 +54,7 @@ class clusterization:
         labels_cp = self.labels[:]
         measure = 0
 
-        for i in len(points_to_move):
+        for i in range(len(points_to_move)):
             point = points_to_move[i]
             cluster = clusters_to_move_to[i]
             measure = self.measure.update(self.X, self.n_clusters, labels_cp, labels_cp[point], cluster, point)
@@ -63,7 +63,7 @@ class clusterization:
 
     # move points
     def move_points(self, points_to_move, clusters_to_move_to):
-        for i in len(points_to_move):
+        for i in range(len(points_to_move)):
             self.labels[points_to_move[i]] = clusters_to_move_to[i]
 
     def copy(self):
