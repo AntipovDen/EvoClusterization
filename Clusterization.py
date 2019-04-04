@@ -59,17 +59,13 @@ class clusterization:
         ##fake move of the labels
         #make the copy of the labels instance
         self.labels_cp = deepcopy(self.labels)
-        for i in range(len(points_to_move)):
-            self.labels_cp[points_to_move[i]] = clusters_to_move_to[i]
-
         #make the copy of the measure instance
         self.measure_cp = deepcopy(self.measure)
-
         # result of the CVI
         CVI = 0
-
         for i in range(len(points_to_move)):
             point = points_to_move[i]
+            self.labels_cp[point] = clusters_to_move_to[i]
             cluster = clusters_to_move_to[i]
             CVI = self.measure_cp.update(self.X, self.n_clusters, self.labels_cp, self.labels[point], cluster, point)
 
