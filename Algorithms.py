@@ -47,6 +47,7 @@ class GreedyAlgorithm:
             self.measure = measure
 
     def run(self):
+        start_time = time()
         mutation_rate = 1
         iter = 0
         while True:
@@ -63,7 +64,8 @@ class GreedyAlgorithm:
             self.clusterization.move_points()
             self.measure = new_measure
             mutation_rate *= 2
-        return self.measure
+            iter += 1
+        return self.measure, iter, time() - start_time
 
 
 class EvoOnePlusOne:
@@ -75,8 +77,8 @@ class EvoOnePlusOne:
             self.measure = measure
 
     def run(self):
-        mutation_rate = 1
         start_time = time()
+        mutation_rate = 1
         iter = 0
         while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
             # candidates for the mutation
@@ -107,7 +109,7 @@ class EvoOnePlusOne:
             print("new rate\t{}".format(mutation_rate))
             iter += 1
             # print("Iteration " + str(self.measure))
-        return self.measure
+        return self.measure, iter, time() - start_time
 
 
 class EvoOnePlusFour:
@@ -167,5 +169,6 @@ class EvoOnePlusFour:
             else:
                 print("declined")
             # print("Iteration " + str(self.measure))
-        return self.measure
+            iter += 1
+        return self.measure, iter, time() - start_time
 

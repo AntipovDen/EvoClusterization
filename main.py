@@ -70,6 +70,6 @@ for index in indicies:
     cl = clusterization(X1, labels, n_clusters, index)
     m = cl.init_measure()
     # algo = GreedyAlgorithm(cl)
-    # algo = EvoOnePlusOne(cl)
-    algo = EvoOnePlusFour(cl)
+    algo = EvoOnePlusOne(cl)
+    # algo = EvoOnePlusFour(cl)
     print(algo.run())
