@@ -56,7 +56,7 @@ class Index(Measure):
                 if self.delta[i][j] != 0:
                     minimum_dif_c = min(minimum_dif_c, self.delta[i][j])
             self.sums[i] *= (2 / self.point_in_c[i])
-        print(max(self.sums))
+        #print(max(self.sums))
         return -(minimum_dif_c / max(self.sums))
 
 

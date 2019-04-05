@@ -54,11 +54,12 @@ labels = res.labels_
 print(labels)
 n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
 
-#
+#gD33.Index(), gD43.Index(), gD31.Index(),
+#c_index.Index(), ch_index.Index(),
 
 indicies = [gD33.Index(), gD43.Index(), gD31.Index(),
-            c_index.Index(), ch_index.Index(), dunn_index.Index(),
-            davies_bouldin.Index(), sil_index.Index(),
+            c_index.Index(), ch_index.Index(),
+            dunn_index.Index(), davies_bouldin.Index(), sil_index.Index(),
             db.Index(), gD41.Index(), gD51.Index(), gD53.Index(),
             cs.Index(), dbs.Index(), sym.Index(), cop.Index(),
             sv.Index(), sdb.Index(), sdbw.Index(), os.Index()]
@@ -67,6 +68,7 @@ i = 0
 for index in indicies:
     i += 1
     print("Index " + str(i))
+#<<<<<<< Updated upstream
     for Algo in GreedyAlgorithm, EvoOnePlusOne: #, EvoOnePlusFour:
         cl = clusterization(X1, labels, n_clusters, index)
         m = cl.init_measure()
@@ -79,3 +81,11 @@ for index in indicies:
         print("Iterations performed  {}".format(iters))
         print("Time spent            {}".format(t))
 
+# =======
+#     cl = clusterization(X1, labels, n_clusters, index)
+#     #m = cl.init_measure()
+#     # algo = GreedyAlgorithm(cl)
+#     algo = EvoOnePlusOne(cl)
+#     #algo = EvoOnePlusFour(cl)
+#     print(algo.run())
+# >>>>>>> Stashed changes

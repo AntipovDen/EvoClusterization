@@ -77,9 +77,9 @@ class Index(Measure):
                 - (self.cluster_sizes[l] - 1) * (self.cluster_sizes[l] - 2) / 2 + self.cluster_sizes[l] * (self.cluster_sizes[l] - 1) / 2
 
         delta = 0.1
-        print(prev_n_w)
-        print(self.n_w)
-        print(delta * len(labels))
+        #print(prev_n_w)
+        #print(self.n_w)
+        #print(delta * len(labels))
 
         if abs(self.n_w - prev_n_w) > delta * len(labels):
             self.s_min = heapq.nsmallest(int(self.n_w), self.distances)
