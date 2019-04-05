@@ -1,3 +1,4 @@
+import gc
 from time import time
 from numpy import partition, sum, argmin
 from random import sample
@@ -143,6 +144,10 @@ class EvoOnePlusFour:
         while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
             print("iteration\t{}".format(iter))
             print("measure\t\t{}".format(self.measure))
+            print("running garbage collector")
+            offspring = None
+            gc.collect()
+            print("garbage collector must have done its work")
 
             with Pool(4) as pool:
                 offspring = pool.map(self.mutation, [2 ** i for i in range(4)]) # creating four offspring in parallel threads
