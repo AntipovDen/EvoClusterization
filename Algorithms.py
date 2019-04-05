@@ -4,6 +4,7 @@ from random import sample
 from numpy.random import choice
 from math import ceil
 from multiprocessing import Pool, Queue
+from sys import float_info, stderr
 #import Clusterization.clusterization as cl
 
 # each algorithm takes some clusterization as an a input argument to the constructor
@@ -46,14 +47,19 @@ class GreedyAlgorithm:
 
     def run(self):
         mutation_rate = 1
+        iter = 0
         while True:
             # candidates for the mutation
+            print("iteration\t{}".format(iter))
+            print("measure\t\t{}".format(self.measure))
             centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
             to_mutate = n_mins(centroid_distances, mutation_rate)
+            print("mutation\t{}".format(to_mutate))
             # mutation itself
             new_measure = self.clusterization.recalculated_measure_C(to_mutate, centroids_numbers)
             if new_measure >= self.measure:
                 break
+            self.clusterization.move_points()
             self.measure = new_measure
             mutation_rate *= 2
         return self.measure
@@ -70,9 +76,11 @@ class EvoOnePlusOne:
     def run(self):
         mutation_rate = 1
         start_time = time()
+        iter = 0
         while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
             # candidates for the mutation
-            print("start iteration")
+            print("iteration\t{}".format(iter))
+            print("measure\t\t{}".format(self.measure))
             centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
 
             # calculating the probabilities for the points to be moved
@@ -81,17 +89,23 @@ class EvoOnePlusOne:
 
             # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
             to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
+            print("mutation\t{}".format(to_mutate))
 
             new_measure = self.clusterization.recalculated_measure_C(to_mutate, [centroids_numbers[point] for point in to_mutate])
+            print("new measure\t{}".format(new_measure))
 
             if new_measure > self.measure:
-                mutation_rate /= 2
-            elif new_measure <= self.measure:
                 mutation_rate = min(mutation_rate * 2 ** 0.25, len(self.clusterization.labels) / 2)
+                print("declined")
+            elif new_measure <= self.measure:
+                mutation_rate = max(mutation_rate / 2, 1)
+                print("accepted")
                 self.measure = new_measure
-                self.clusterization.move_points(to_mutate, [centroids_numbers[point] for point in to_mutate])
+                self.clusterization.move_points()
 
-            print("Iteration " + str(self.measure))
+            print("new rate\t{}".format(mutation_rate))
+            iter += 1
+            # print("Iteration " + str(self.measure))
         return self.measure
 
 
@@ -107,32 +121,46 @@ class EvoOnePlusFour:
         # this function must generate a mutation, calculate the change in the
         # measure and return the new measure, the array of the moved points and the array of the clusters which
         # these points were moved to.
-        centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
+        try:
+            centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
 
-        # calculating the probabilities for the points to be moved
-        sum_of_distances = sum(1 / i for i in centroid_distances)
-        probabilities = [(1 / i) / sum_of_distances for i in centroid_distances]
+            # calculating the probabilities for the points to be moved
+            sum_of_distances = sum(1 / i for i in centroid_distances)
+            probabilities = [(1 / i) / sum_of_distances for i in centroid_distances]
 
-        # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
-        to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
-        return self.clusterization.recalculated_measure_C(to_mutate, [centroids_numbers[point] for point in to_mutate]), to_mutate, [centroids_numbers[point] for point in to_mutate]
-        # Notice: clusterization.recalculated_measure_C must not change anything in the clusterization or its measure!
+            # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
+            to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
+            return self.clusterization.recalculated_measure_parallel(to_mutate, [centroids_numbers[point] for point in to_mutate])
+        except MemoryError:
+            print("Thread with mutation rate {} has tragically died".format(mutation_rate), file=stderr)
+            return float_info.max, None, None
+        # Notice: clusterization.recalculated_measure_parallel returns not only new measure, but the copy of the
+        # labels and of the measure.
 
     def run(self):
         start_time = time()
+        iter = 0
         while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
-            print("start iteration")
+            print("iteration\t{}".format(iter))
+            print("measure\t\t{}".format(self.measure))
 
             with Pool(4) as pool:
-                offspring = pool.map(self.mutation, [1, 4, 8, 16]) # creating four offspring in parallel threads
+                offspring = pool.map(self.mutation, [2 ** i for i in range(4)]) # creating four offspring in parallel threads
+
+            print("mut rate\toffsring measure")
+            for i in range(4):
+                print("{}\t\t\t{}".format(2 ** i, offspring[i][0]))
 
             best_offspring = argmin([child[0] for child in offspring])
             if offspring[best_offspring][0] <= self.measure:
                 self.clusterization.move_points(*offspring[best_offspring][1:])  # actually moving the points, since
                                                                                  # we do not really do it in the
                                                                                  # mutation phase.
-                self.measure = offspring[best_offspring[0]]
-
-            print("Iteration " + str(self.measure))
+                self.measure = offspring[best_offspring][0]
+                print("accepted")
+                print("new measure\t{}".format(self.measure))
+            else:
+                print("declined")
+            # print("Iteration " + str(self.measure))
         return self.measure
 

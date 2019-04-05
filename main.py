@@ -26,7 +26,7 @@ import metrics.gD43_index as gD43
 import metrics.gD31_index as gD31
 
 from Clusterization import clusterization
-from Algorithms import GreedyAlgorithm, EvoOnePlusOne
+from Algorithms import GreedyAlgorithm, EvoOnePlusOne, EvoOnePlusFour
 
 X = []
 with open('s3.txt', 'r') as f:
@@ -69,5 +69,7 @@ for index in indicies:
     print("Index " + str(i))
     cl = clusterization(X1, labels, n_clusters, index)
     m = cl.init_measure()
-    gr = GreedyAlgorithm(cl) #EvoOnePlusOne(cl)
-    print(gr.run())
+    # algo = GreedyAlgorithm(cl)
+    # algo = EvoOnePlusOne(cl)
+    algo = EvoOnePlusFour(cl)
+    print(algo.run())
