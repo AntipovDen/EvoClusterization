@@ -67,9 +67,15 @@ i = 0
 for index in indicies:
     i += 1
     print("Index " + str(i))
-    cl = clusterization(X1, labels, n_clusters, index)
-    m = cl.init_measure()
-    # algo = GreedyAlgorithm(cl)
-    algo = EvoOnePlusOne(cl)
-    # algo = EvoOnePlusFour(cl)
-    print(algo.run())
+    for Algo in GreedyAlgorithm, EvoOnePlusOne: #, EvoOnePlusFour:
+        cl = clusterization(X1, labels, n_clusters, index)
+        m = cl.init_measure()
+        algo = Algo(cl, m)
+        new_measure, iters, t = algo.run()
+        print("Run of the algorithm  {}".format(Algo.__name__))
+        print("Measure impoovement   {}".format(m - new_measure))
+        print("from                  {}".format(m))
+        print("to                    {}".format(new_measure))
+        print("Iterations performed  {}".format(iters))
+        print("Time spent            {}".format(t))
+
