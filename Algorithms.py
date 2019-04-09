@@ -52,11 +52,11 @@ class GreedyAlgorithm:
         iter = 0
         while True:
             # candidates for the mutation
-            print("iteration\t{}".format(iter))
-            print("measure\t\t{}".format(self.measure))
+            #print("iteration\t{}".format(iter))
+            #print("measure\t\t{}".format(self.measure))
             centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
             to_mutate = n_mins(centroid_distances, mutation_rate)
-            print("mutation\t{}".format(to_mutate))
+            #print("mutation\t{}".format(to_mutate))
             # mutation itself
             new_measure = self.clusterization.recalculated_measure_C(to_mutate, centroids_numbers)
             if new_measure >= self.measure:
@@ -82,8 +82,8 @@ class EvoOnePlusOne:
         iter = 0
         while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
             # candidates for the mutation
-            print("iteration\t{}".format(iter))
-            print("measure\t\t{}".format(self.measure))
+            #print("iteration\t{}".format(iter))
+            #print("measure\t\t{}".format(self.measure))
             centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
 
             # calculating the probabilities for the points to be moved
@@ -92,21 +92,21 @@ class EvoOnePlusOne:
 
             # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
             to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
-            print("mutation\t{}".format(to_mutate))
+            #print("mutation\t{}".format(to_mutate))
 
             new_measure = self.clusterization.recalculated_measure_C(to_mutate, [centroids_numbers[point] for point in to_mutate])
-            print("new measure\t{}".format(new_measure))
+            #print("new measure\t{}".format(new_measure))
 
             if new_measure > self.measure:
                 mutation_rate = min(mutation_rate * 2 ** 0.25, len(self.clusterization.labels) / 2)
-                print("declined")
+                #print("declined")
             elif new_measure <= self.measure:
                 mutation_rate = max(mutation_rate / 2, 1)
-                print("accepted")
+                #print("accepted")
                 self.measure = new_measure
                 self.clusterization.move_points()
 
-            print("new rate\t{}".format(mutation_rate))
+            #print("new rate\t{}".format(mutation_rate))
             iter += 1
             # print("Iteration " + str(self.measure))
         return self.measure, iter, time() - start_time
@@ -135,7 +135,7 @@ class EvoOnePlusFour:
             to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
             return self.clusterization.recalculated_measure_parallel(to_mutate, [centroids_numbers[point] for point in to_mutate])
         except MemoryError:
-            print("Thread with mutation rate {} has tragically died".format(mutation_rate), file=stderr)
+            #print("Thread with mutation rate {} has tragically died".format(mutation_rate), file=stderr)
             return float_info.max, None, None
         # Notice: clusterization.recalculated_measure_parallel returns not only new measure, but the copy of the
         # labels and of the measure.
@@ -144,19 +144,19 @@ class EvoOnePlusFour:
         start_time = time()
         iter = 0
         while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
-            print("iteration\t{}".format(iter))
-            print("measure\t\t{}".format(self.measure))
-            print("running garbage collector")
+            #print("iteration\t{}".format(iter))
+            #print("measure\t\t{}".format(self.measure))
+            #print("running garbage collector")
             offspring = None
             gc.collect()
-            print("garbage collector must have done its work")
+            #print("garbage collector must have done its work")
 
             with Pool(4) as pool:
                 offspring = pool.map(self.mutation, [2 ** i for i in range(4)]) # creating four offspring in parallel threads
 
-            print("mut rate\toffsring measure")
-            for i in range(4):
-                print("{}\t\t\t{}".format(2 ** i, offspring[i][0]))
+            #print("mut rate\toffsring measure")
+            #for i in range(4):
+                #print("{}\t\t\t{}".format(2 ** i, offspring[i][0]))
 
             best_offspring = argmin([child[0] for child in offspring])
             if offspring[best_offspring][0] <= self.measure:
@@ -164,10 +164,10 @@ class EvoOnePlusFour:
                                                                                  # we do not really do it in the
                                                                                  # mutation phase.
                 self.measure = offspring[best_offspring][0]
-                print("accepted")
-                print("new measure\t{}".format(self.measure))
-            else:
-                print("declined")
+                #print("accepted")
+                #print("new measure\t{}".format(self.measure))
+            #else:
+                #print("declined")
             # print("Iteration " + str(self.measure))
             iter += 1
         return self.measure, iter, time() - start_time

@@ -5,6 +5,7 @@ datas = [
 ]
 
 indices = [
+    ('cop', 'cop.Index()'),
     ('silhouette', 'sil_index.Index()'),
     ('calinski_harabaz', 'ch_index.Index()'),
     ('davies_bouldin', 'db.Index()'),
@@ -22,16 +23,14 @@ indices = [
     ('sym', 'sym.Index()'),
     ('sym_db', 'sdb.Index()'),
     ('sv_index', 'sv.Index()'),
-    ('cs', 'cs.Index()'),
-    ('cop', 'cop.Index()')
-
+    ('cs', 'cs.Index()')
 ]
 
 #GreedyAlgorithm, EvoOnePlusOne: #, EvoOnePlusFour:
 algos = [
-    ('greedy', 'GreedyAlgorithm(cl, m)'),
-    ('evo_one_one', 'EvoOnePlusOne(cl, m)'),
-    ('evo_one_four', 'EvoOnePlusFour(cl, m)')
+    ('greedy', 'GreedyAlgorithm'),
+    ('evo_one_one', 'EvoOnePlusOne'),
+    ('evo_one_four', 'EvoOnePlusFour')
 ]
 
 
@@ -45,5 +44,5 @@ for data_name, data in datas:
     for index_name, index in indices:
         for algo_name, algo in algos:
             fname = get_file_name(data_name, index_name, algo_name)
-            tasks.append((fname, "run_config(output_prefix+ '/' + '{}', {}, {}, {})".format(fname,
+            tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {}, {})".format(fname,
                                                                                                 data, index, algo)))
