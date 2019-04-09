@@ -35,65 +35,66 @@ output_prefix = '.'
 
 def run_config(fname, data, index, algo):
     print('Launching', fname, file=sys.stderr)
-    with open(fname, 'w') as result:
-        try:
-            X = []
-            with open(data, 'r') as f:
-                content = f.readlines()
-                for x in content:
-                    row = x.split()
-                    res = []
-                    for i in row:
-                        res.append(int(i))
-                    X.append(res)
+    for k in range(0, 20):
+        with open(fname, 'a') as result:
+            try:
+                X = []
+                with open(data, 'r') as f:
+                    content = f.readlines()
+                    for x in content:
+                        row = x.split()
+                        res = []
+                        for i in row:
+                            res.append(int(i))
+                        X.append(res)
 
-            n_clusters = 15
-            X1 = StandardScaler().fit_transform(np.array(X))
-            connectivity = kneighbors_graph(X1, n_neighbors=2, include_self=False)
-            # res = KMeans(n_clusters=n_clusters, random_state=0).fit(X1)
-            # res = cluster.Birch(n_clusters=n_clusters).fit(X1)
-            # res = cluster.AgglomerativeClustering(
-            #             linkage="average", affinity="cityblock",
-            #             n_clusters=n_clusters, connectivity=connectivity).fit(X1)
-            res = cluster.SpectralClustering(n_clusters=n_clusters,
-                                             eigen_solver='arpack',
-                                             affinity="nearest_neighbors").fit(X1)
-            # res = DBSCAN().fit(X1)
-            labels = res.labels_
-            n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+                n_clusters = 15
+                X1 = StandardScaler().fit_transform(np.array(X))
+                connectivity = kneighbors_graph(X1, n_neighbors=2, include_self=False)
+                # res = KMeans(n_clusters=n_clusters, random_state=0).fit(X1)
+                # res = cluster.Birch(n_clusters=n_clusters).fit(X1)
+                # res = cluster.AgglomerativeClustering(
+                #             linkage="average", affinity="cityblock",
+                #             n_clusters=n_clusters, connectivity=connectivity).fit(X1)
+                res = cluster.SpectralClustering(n_clusters=n_clusters, random_state=k,
+                                                 eigen_solver='arpack',
+                                                 affinity="nearest_neighbors").fit(X1)
+                # res = DBSCAN().fit(X1)
+                labels = res.labels_
+                n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
 
-            cl = clusterization(X1, labels, n_clusters, index)
-            m = cl.init_measure()
-
-
-            strategy = algo(cl, m)
-
-            new_measure, iters, t = strategy.run()
-
-            #result.write("Run of the algorithm  {}".format(strategy.__name__))
-            result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-            result.write("from                  {}\n".format(m))
-            result.write("to                    {}\n".format(new_measure))
-            result.write("Iterations performed  {}\n".format(iters))
-            result.write("Time spent            {}\n".format(t))
-            return
-        except:
-            traceback.print_exc(file=result)
+                cl = clusterization(X1, labels, n_clusters, index)
+                m = cl.init_measure()
 
 
-if __name__ == "__main__":   
-    if len(sys.argv) == 1:
-        print('Total', len(tasks), 'tasks to run')
-    elif len(sys.argv) == 2:
-        print(tasks[int(sys.argv[1])][0])
-    else:
-        output_prefix = sys.argv[2]
-        eval(tasks[int(sys.argv[1])][1])
+                strategy = algo(cl, m)
 
-    #for i in range(len(tasks)):
-    #    print(tasks[i][0])
-    #    output_prefix = sys.argv[1]
-    #    eval(tasks[i][1])
+                new_measure, iters, t = strategy.run()
+
+                #result.write("Run of the algorithm  {}".format(strategy.__name__))
+                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
+                result.write("from                  {}\n".format(m))
+                result.write("to                    {}\n".format(new_measure))
+                result.write("Iterations performed  {}\n".format(iters))
+                result.write("Time spent            {}\n".format(t))
+                continue
+            except:
+                traceback.print_exc(file=result)
+
+
+if __name__ == "__main__":
+    # if len(sys.argv) == 1:
+    #     print('Total', len(tasks), 'tasks to run')
+    # elif len(sys.argv) == 2:
+    #     print(tasks[int(sys.argv[1])][0])
+    # else:
+    #     output_prefix = sys.argv[2]
+    #     eval(tasks[int(sys.argv[1])][1])
+
+    for i in range(len(tasks)):
+       print(tasks[i][0])
+       output_prefix = '.'
+       eval(tasks[i][1])
 
 
 # indicies = [gD33.Index(), gD43.Index(), gD31.Index(),
