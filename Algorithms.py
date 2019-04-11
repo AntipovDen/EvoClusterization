@@ -1,5 +1,5 @@
 import gc
-from time import time
+from time import time, process_time
 from numpy import partition, sum, argmin
 from random import sample
 from numpy.random import choice
@@ -47,7 +47,7 @@ class GreedyAlgorithm:
             self.measure = measure
 
     def run(self):
-        start_time = time()
+        start_time = process_time()
         mutation_rate = 1
         iter = 0
         while True:
@@ -65,11 +65,11 @@ class GreedyAlgorithm:
             self.measure = new_measure
             mutation_rate *= 2
             iter += 1
-        return self.measure, iter, time() - start_time
+        return self.measure, iter, process_time() - start_time
 
 
 class EvoOnePlusOne:
-    def __init__(self, clusterization, measure = None):
+    def __init__(self, clusterization, measure=None):
         self. clusterization = clusterization
         if measure is None:
             self.measure = clusterization.init_measure()
@@ -77,10 +77,10 @@ class EvoOnePlusOne:
             self.measure = measure
 
     def run(self):
-        start_time = time()
+        start_time = process_time()
         mutation_rate = 1
         iter = 0
-        while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
+        while process_time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
             # candidates for the mutation
             #print("iteration\t{}".format(iter))
             #print("measure\t\t{}".format(self.measure))
@@ -109,7 +109,7 @@ class EvoOnePlusOne:
             #print("new rate\t{}".format(mutation_rate))
             iter += 1
             # print("Iteration " + str(self.measure))
-        return self.measure, iter, time() - start_time
+        return self.measure, iter, process_time() - start_time
 
 
 class EvoOnePlusFour:
@@ -141,9 +141,9 @@ class EvoOnePlusFour:
         # labels and of the measure.
 
     def run(self):
-        start_time = time()
+        start_time = process_time()
         iter = 0
-        while time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
+        while process_time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
             #print("iteration\t{}".format(iter))
             #print("measure\t\t{}".format(self.measure))
             #print("running garbage collector")
@@ -170,5 +170,5 @@ class EvoOnePlusFour:
                 #print("declined")
             # print("Iteration " + str(self.measure))
             iter += 1
-        return self.measure, iter, time() - start_time
+        return self.measure, iter, process_time() - start_time
 
