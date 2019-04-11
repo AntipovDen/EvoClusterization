@@ -1,4 +1,5 @@
 import numpy as np
+from multiprocessing import Value, Pool
 from sklearn import cluster
 from sklearn.manifold import TSNE
 from sklearn.neighbors import kneighbors_graph
@@ -135,6 +136,42 @@ def run_config(fname, data, index, algo):
             traceback.print_exc(file=result)
 
 
+# global counters
+counter_one_threaded, counter_multi_threaded = None, None
+
+# initializing the counter for the pool of processes.
+def init(counter_1, counter_2):
+    global counter_one_threaded, counter_multi_threaded
+    counter_one_threaded = counter_1
+    counter_multi_threaded = counter_2
+
+# the function of the thread that runs tasks
+def run_tasks(thread_number):
+    global counter_one_threaded, counter_multi_threaded
+    # if thread number is 0 or 1, we run the next possible one-threaded task
+    if thread_number in [0, 1]:
+        while True:
+            with counter_one_threaded.get_lock():
+                task_number = counter_one_threaded.value
+                counter_one_threaded.value += 1
+            task_number = task_number // 2 * 3 + task_number % 2
+            if task_number > 170:
+                return
+            # print('({}, {}),'.format(thread_number, task_number))
+            eval(tasks[task_number][1])
+    else:
+        while True:
+            with counter_multi_threaded.get_lock():
+                task_number = counter_multi_threaded.value
+                counter_multi_threaded.value += 1
+            task_number = task_number * 3 + 2
+            if task_number > 170:
+                return
+
+            # print('({}, {}),'.format(thread_number, task_number))
+            eval(tasks[task_number][1])
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print('Total', len(tasks), 'tasks to run')
@@ -142,7 +179,11 @@ if __name__ == "__main__":
         print(tasks[int(sys.argv[1])][0])
     else:
         output_prefix = sys.argv[2]
-        eval(tasks[int(sys.argv[1])][1])
+        # 2 processes run 1-thread algorithms and 1 process runs a (1 + 4) EA
+        with Pool(3, init, (Value('i', 0), Value('i', 0))) as pool:
+            pool.map(run_tasks, range(3))
+        # eval(tasks[int(sys.argv[1])][1])
+
 
     # for i in range(len(tasks)):
     #    print(tasks[i][0])
