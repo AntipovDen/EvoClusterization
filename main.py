@@ -28,14 +28,17 @@ import metrics.gD31_index as gD31
 import sys
 from batch_tasks import tasks
 import traceback
+import datetime
 
 from Clusterization import clusterization
 from Algorithms import GreedyAlgorithm, EvoOnePlusOne, EvoOnePlusFour
 
 output_prefix = '.'
 
-def run_config(fname, data, index, algo):
+def run_config(fname, data, index, algo, init):
     print('Launching', fname, file=sys.stderr)
+    today = datetime.datetime.now()
+    print(today.strftime("%Y-%m-%d %H.%M.%S") ) # 2017-04-05-00.18.00
 
     with open(fname, 'a') as result:
         try:
@@ -51,72 +54,9 @@ def run_config(fname, data, index, algo):
 
             n_clusters = 15
             X1 = StandardScaler().fit_transform(np.array(X))
-            connectivity = kneighbors_graph(X1, n_neighbors=2, include_self=False)
+            #connectivity = kneighbors_graph(X1, n_neighbors=2, include_self=False)
 
-            #Spectral
-            for k in range(0, 9):
-                res = cluster.SpectralClustering(n_clusters=n_clusters, random_state=k,
-                                                 eigen_solver='arpack',
-                                                 affinity="nearest_neighbors").fit(X1)
-                labels = res.labels_
-                n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-
-                cl = clusterization(X1, labels, n_clusters, index)
-                m = cl.init_measure()
-
-
-                strategy = algo(cl, m)
-
-                new_measure, iters, t = strategy.run()
-
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-            #k-Means
-            for k in range(0, 9):
-                res = cluster.KMeans(n_clusters=n_clusters, random_state=k).fit(X1)
-                labels = res.labels_
-                n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-
-                cl = clusterization(X1, labels, n_clusters, index)
-                m = cl.init_measure()
-
-                strategy = algo(cl, m)
-
-                new_measure, iters, t = strategy.run()
-
-                # result.write("Run of the algorithm  {}".format(strategy.__name__))
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-            #Birch
-            res = cluster.Birch(n_clusters=n_clusters).fit(X1)
-            labels = res.labels_
-            n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-
-            cl = clusterization(X1, labels, n_clusters, index)
-            m = cl.init_measure()
-
-            strategy = algo(cl, m)
-
-            new_measure, iters, t = strategy.run()
-
-            result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-            result.write("from                  {}\n".format(m))
-            result.write("to                    {}\n".format(new_measure))
-            result.write("Iterations performed  {}\n".format(iters))
-            result.write("Time spent            {}\n".format(t))
-
-            #Agglomerative
-            res = cluster.AgglomerativeClustering(
-                             linkage="average", affinity="cityblock",
-                             n_clusters=n_clusters, connectivity=connectivity).fit(X1)
+            res = init.fit(X1)
             labels = res.labels_
             n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
 
@@ -155,7 +95,7 @@ def run_tasks(thread_number):
                 task_number = counter_one_threaded.value
                 counter_one_threaded.value += 1
             task_number = task_number // 2 * 3 + task_number % 2
-            if task_number > 170:
+            if task_number > 3419: #170:
                 return
             # print('({}, {}),'.format(thread_number, task_number))
             eval(tasks[task_number][1])
@@ -165,7 +105,7 @@ def run_tasks(thread_number):
                 task_number = counter_multi_threaded.value
                 counter_multi_threaded.value += 1
             task_number = task_number * 3 + 2
-            if task_number > 170:
+            if task_number > 3419:#170:
                 return
 
             # print('({}, {}),'.format(thread_number, task_number))

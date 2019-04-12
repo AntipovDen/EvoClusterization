@@ -33,9 +33,19 @@ algos = [
     ('evo_one_four', 'EvoOnePlusFour')
 ]
 
+initializations = [
+    ('birch', 'cluster.Birch()'),
+    ('agglomerative', 'cluster.AgglomerativeClustering(linkage="average", affinity="cityblock")')
+]
 
-def get_file_name(data, index, algo):
-    return '{}-{}-{}.txt'.format(data, index, algo)
+for k in range(0, 9):
+    initializations.append(('spectral-' + str(k), 'cluster.SpectralClustering(random_state='+
+                            str(k) +', eigen_solver="arpack", affinity="nearest_neighbors")'))
+    initializations.append(('k-means-' + str(k), 'cluster.KMeans(random_state='+
+                            str(k)+')'))
+
+def get_file_name(data, index, algo, init):
+    return '{}-{}-{}-{}.txt'.format(data, index, algo, init)
 
 
 # tasks = [('state-of-the-art.txt', 'run_state_of_the_art([datas, indices])')]
@@ -43,6 +53,7 @@ tasks = []
 for data_name, data in datas:
     for index_name, index in indices:
         for algo_name, algo in algos:
-            fname = get_file_name(data_name, index_name, algo_name)
-            tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {}, {})".format(fname,
-                                                                                                data, index, algo)))
+            for init_name, init in initializations:
+                fname = get_file_name(data_name, index_name, algo_name, init_name)
+                tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {}, {}, {})".format(fname,
+                                                                                                data, index, algo, init)))
