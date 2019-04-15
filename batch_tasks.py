@@ -27,33 +27,42 @@ indices = [
 ]
 
 #GreedyAlgorithm, EvoOnePlusOne: #, EvoOnePlusFour:
-algos = [
-    ('greedy', 'GreedyAlgorithm'),
-    ('evo_one_one', 'EvoOnePlusOne'),
-    ('evo_one_four', 'EvoOnePlusFour')
-]
+#algos = [
+#    ('greedy', 'GreedyAlgorithm'),
+#    ('evo_one_one', 'EvoOnePlusOne'),
+#    ('evo_one_four', 'EvoOnePlusFour')
+#]
 
-initializations = [
-    ('birch', 'cluster.Birch()'),
-    ('agglomerative', 'cluster.AgglomerativeClustering(linkage="average", affinity="cityblock")')
-]
+#initializations = [
+#    ('birch', 'cluster.Birch()'),
+#    ('agglomerative', 'cluster.AgglomerativeClustering(linkage="average", affinity="cityblock")')
+#]
 
-for k in range(0, 9):
-    initializations.append(('spectral-' + str(k), 'cluster.SpectralClustering(random_state='+
-                            str(k) +', eigen_solver="arpack", affinity="nearest_neighbors")'))
-    initializations.append(('k-means-' + str(k), 'cluster.KMeans(random_state='+
-                            str(k)+')'))
+#for k in range(0, 9):
+#    initializations.append(('spectral-' + str(k), 'cluster.SpectralClustering(random_state='+
+#                            str(k) +', eigen_solver="arpack", affinity="nearest_neighbors")'))
+#    initializations.append(('k-means-' + str(k), 'cluster.KMeans(random_state='+
+#                            str(k)+')'))
 
-def get_file_name(data, index, algo, init):
-    return '{}-{}-{}-{}.txt'.format(data, index, algo, init)
+# def get_file_name(data, index, algo, init):
+#     return '{}-{}-{}-{}.txt'.format(data, index, algo, init)
+
+
+def get_file_name(data, index):
+    return '{}-{}'.format(data, index)
 
 
 # tasks = [('state-of-the-art.txt', 'run_state_of_the_art([datas, indices])')]
 tasks = []
+# for data_name, data in datas:
+#     for index_name, index in indices:
+#         for algo_name, algo in algos:
+#             for init_name, init in initializations:
+#                 fname = get_file_name(data_name, index_name, algo_name, init_name)
+#                 tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {}, {}, {})".format(fname,
+#                                                                                                 data, index, algo, init)))
+
 for data_name, data in datas:
     for index_name, index in indices:
-        for algo_name, algo in algos:
-            for init_name, init in initializations:
-                fname = get_file_name(data_name, index_name, algo_name, init_name)
-                tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {}, {}, {})".format(fname,
-                                                                                                data, index, algo, init)))
+        fname = get_file_name(data_name, index_name)
+        tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {})".format(fname, data, index)))
