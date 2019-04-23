@@ -135,7 +135,7 @@ class EvoOnePlusFour:
             to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
             return self.clusterization.recalculated_measure_parallel(to_mutate, [centroids_numbers[point] for point in to_mutate])
         except MemoryError:
-            #print("Thread with mutation rate {} has tragically died".format(mutation_rate), file=stderr)
+            print("Thread with mutation rate {} has tragically died".format(mutation_rate), file=stderr)
             return float_info.max, None, None
         # Notice: clusterization.recalculated_measure_parallel returns not only new measure, but the copy of the
         # labels and of the measure.
@@ -144,19 +144,13 @@ class EvoOnePlusFour:
         start_time = process_time()
         iter = 0
         while process_time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
-            #print("iteration\t{}".format(iter))
-            #print("measure\t\t{}".format(self.measure))
-            #print("running garbage collector")
-            offspring = None
+            del offspring
             gc.collect()
-            #print("garbage collector must have done its work")
+            # print("garbage collector must have done its work")
 
             with Pool(4) as pool:
                 offspring = pool.map(self.mutation, [2 ** i for i in range(4)]) # creating four offspring in parallel threads
 
-            #print("mut rate\toffsring measure")
-            #for i in range(4):
-                #print("{}\t\t\t{}".format(2 ** i, offspring[i][0]))
 
             best_offspring = argmin([child[0] for child in offspring])
             if offspring[best_offspring][0] <= self.measure:
@@ -164,11 +158,6 @@ class EvoOnePlusFour:
                                                                                  # we do not really do it in the
                                                                                  # mutation phase.
                 self.measure = offspring[best_offspring][0]
-                #print("accepted")
-                #print("new measure\t{}".format(self.measure))
-            #else:
-                #print("declined")
-            # print("Iteration " + str(self.measure))
             iter += 1
         return self.measure, iter, process_time() - start_time
 
