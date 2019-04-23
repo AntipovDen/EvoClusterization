@@ -34,6 +34,8 @@ import json
 from Clusterization import clusterization
 from Algorithms import GreedyAlgorithm, EvoOnePlusOne, EvoOnePlusFour
 
+from copy import deepcopy
+
 output_prefix = '.'
 
 def run_config(fname, data, index):
@@ -68,7 +70,7 @@ def run_config(fname, data, index):
 
 
             #Greedy
-            strategy = GreedyAlgorithm(cl, m)
+            strategy = GreedyAlgorithm(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
 
             with open(fname + '-greedy.txt', 'a') as result:
@@ -80,10 +82,10 @@ def run_config(fname, data, index):
                 result.write("Time spent            {}\n".format(t))
 
             #1+1
-            strategy = EvoOnePlusOne(cl, m)
+            strategy = EvoOnePlusOne(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
             with open(fname + '-one_plus_one.txt', 'a') as result:
-                print('Launching', fname + '-greedy.txt', file=sys.stderr)
+                print('Launching', fname + '-one_plus_one.txt', file=sys.stderr)
                 result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
                 result.write("from                  {}\n".format(m))
                 result.write("to                    {}\n".format(new_measure))
@@ -91,9 +93,10 @@ def run_config(fname, data, index):
                 result.write("Time spent            {}\n".format(t))
 
             #1+4
-            strategy = EvoOnePlusFour(cl, m)
+            strategy = EvoOnePlusFour(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
             with open(fname + '-one_plus_four.txt', 'a') as result:
+                print('Launching', fname + '-one_plus_four.txt', file=sys.stderr)
                 result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
                 result.write("from                  {}\n".format(m))
                 result.write("to                    {}\n".format(new_measure))
@@ -110,9 +113,11 @@ def run_config(fname, data, index):
             m = cl.init_measure()
 
             # Greedy
-            strategy = GreedyAlgorithm(cl, m)
+            strategy = GreedyAlgorithm(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
+
             with open(fname + '-greedy.txt', 'a') as result:
+                print('Launching', fname + '-greedy.txt', file=sys.stderr)
                 result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
                 result.write("from                  {}\n".format(m))
                 result.write("to                    {}\n".format(new_measure))
@@ -120,9 +125,10 @@ def run_config(fname, data, index):
                 result.write("Time spent            {}\n".format(t))
 
             # 1+1
-            strategy = EvoOnePlusOne(cl, m)
+            strategy = EvoOnePlusOne(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
             with open(fname + '-one_plus_one.txt', 'a') as result:
+                print('Launching', fname + '-one_plus_one.txt', file=sys.stderr)
                 result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
                 result.write("from                  {}\n".format(m))
                 result.write("to                    {}\n".format(new_measure))
@@ -130,9 +136,10 @@ def run_config(fname, data, index):
                 result.write("Time spent            {}\n".format(t))
 
             # 1+4
-            strategy = EvoOnePlusFour(cl, m)
+            strategy = EvoOnePlusFour(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
             with open(fname + '-one_plus_four.txt', 'a') as result:
+                print('Launching', fname + '-one_plus_four.txt', file=sys.stderr)
                 result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
                 result.write("from                  {}\n".format(m))
                 result.write("to                    {}\n".format(new_measure))
@@ -149,9 +156,11 @@ def run_config(fname, data, index):
             m = cl.init_measure()
 
             # Greedy
-            strategy = GreedyAlgorithm(cl, m)
+            strategy = GreedyAlgorithm(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
+
             with open(fname + '-greedy.txt', 'a') as result:
+                print('Launching', fname + '-greedy.txt', file=sys.stderr)
                 result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
                 result.write("from                  {}\n".format(m))
                 result.write("to                    {}\n".format(new_measure))
@@ -159,9 +168,10 @@ def run_config(fname, data, index):
                 result.write("Time spent            {}\n".format(t))
 
             # 1+1
-            strategy = EvoOnePlusOne(cl, m)
+            strategy = EvoOnePlusOne(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
             with open(fname + '-one_plus_one.txt', 'a') as result:
+                print('Launching', fname + '-one_plus_one.txt', file=sys.stderr)
                 result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
                 result.write("from                  {}\n".format(m))
                 result.write("to                    {}\n".format(new_measure))
@@ -169,9 +179,10 @@ def run_config(fname, data, index):
                 result.write("Time spent            {}\n".format(t))
 
             # 1+4
-            strategy = EvoOnePlusFour(cl, m)
+            strategy = EvoOnePlusFour(deepcopy(cl), m)
             new_measure, iters, t = strategy.run()
             with open(fname + '-one_plus_four.txt', 'a') as result:
+                print('Launching', fname + '-one_plus_four.txt', file=sys.stderr)
                 result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
                 result.write("from                  {}\n".format(m))
                 result.write("to                    {}\n".format(new_measure))
@@ -182,7 +193,7 @@ def run_config(fname, data, index):
 
 
 # global counters
-counter_one_threaded, counter_multi_threaded = None, None
+# counter_one_threaded, counter_multi_threaded = None, None
 
 # initializing the counter for the pool of processes.
 # def init(counter_1, counter_2):
@@ -218,22 +229,24 @@ counter_one_threaded, counter_multi_threaded = None, None
 
 
 if __name__ == "__main__":
-    # if len(sys.argv) == 1:
-    #     print('Total', len(tasks), 'tasks to run')
-    # elif len(sys.argv) == 2:
-    #     print(tasks[int(sys.argv[1])][0])
-    # else:
-    #     output_prefix = sys.argv[2]
-    #     # 2 processes run 1-thread algorithms and 1 process runs a (1 + 4) EA
-    #     #with Pool(3, init, (Value('i', 0), Value('i', 0))) as pool:
-    #     #    pool.map(run_tasks, range(3))
-    #     eval(tasks[int(sys.argv[1])][1])
+    if len(sys.argv) == 1:
+        print('Total', len(tasks), 'tasks to run')
+        for i in range(len(tasks)):
+            print(i, tasks[i][0])
+    elif len(sys.argv) == 2:
+        print(tasks[int(sys.argv[1])][1])
+    else:
+        output_prefix = sys.argv[2]
+        # 2 processes run 1-thread algorithms and 1 process runs a (1 + 4) EA
+        #with Pool(3, init, (Value('i', 0), Value('i', 0))) as pool:
+        #    pool.map(run_tasks, range(3))
+        eval(tasks[int(sys.argv[1])][1])
 
 
-    for i in range(len(tasks)):
-        print(tasks[i][0])
-        output_prefix = '.'
-        eval(tasks[i][1])
+    # for i in range(len(tasks)):
+    #     print(tasks[i][0])
+    #     output_prefix = '.'
+    #     eval(tasks[i][1])
 
 
 # indicies = [gD33.Index(), gD43.Index(), gD31.Index(),
