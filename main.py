@@ -139,21 +139,21 @@ def run_config(fname, data, index, algo):
 
 
 if __name__ == "__main__":
-    # if len(sys.argv) == 1:
-    #     print('Total', len(tasks), 'tasks to run')
-    #     for i in range(len(tasks)):
-    #         print(i, tasks[i][0])
-    # elif len(sys.argv) == 2:
-    #     print(tasks[int(sys.argv[1])][1])
-    # else:
-    #     output_prefix = sys.argv[2]
-    #     eval(tasks[int(sys.argv[1])][1])
+    if len(sys.argv) == 1:
+        print('Total', len(tasks), 'tasks to run')
+        for i in range(len(tasks)):
+            print(i, tasks[i][0])
+    elif len(sys.argv) == 2:
+        print(tasks[int(sys.argv[1])][1])
+    else:
+        output_prefix = sys.argv[2]
+        eval(tasks[int(sys.argv[1])][1])
 
 
-    for i in range(len(tasks)):
-        print(tasks[i][0])
-        output_prefix = '.'
-        eval(tasks[i][1])
+    # for i in range(len(tasks)):
+    #     print(tasks[i][0])
+    #     output_prefix = '.'
+    #     eval(tasks[i][1])
 
 
 # indicies = [gD33.Index(), gD43.Index(), gD31.Index(),
