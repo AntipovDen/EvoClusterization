@@ -60,7 +60,7 @@ class clusterization:
         for i in range(len(points_to_move)):
             point = points_to_move[i]
             self.labels_cp[point] = clusters_to_move_to[i]
-            cluster = clusters_to_move_to[i]
+            #cluster = clusters_to_move_to[i]
         return self.measure_cp.find(self.X, self.labels_cp, self.n_clusters)
 
     #recalculate measure and move points
@@ -100,6 +100,24 @@ class clusterization:
             CVI = measure_cp.update(self.X, self.n_clusters, labels_cp, self.labels[point], cluster, point)
 
         return CVI, labels_cp, measure_cp
+
+    def recalculated_measure_parallel_full(self, points_to_move, clusters_to_move_to):
+        # The version for the parallel run of the several mutations
+        ##fake move of the labels
+        #make the copy of the labels instance
+        labels_cp = deepcopy(self.labels)
+        #make the copy of the measure instance
+        measure_cp = deepcopy(self.measure)
+        # result of the CVI
+        CVI = 0
+        for i in range(len(points_to_move)):
+            point = points_to_move[i]
+            labels_cp[point] = clusters_to_move_to[i]
+        CVI = measure_cp.find(self.X, labels_cp, self.n_clusters)
+
+        return CVI, labels_cp, measure_cp
+
+
 
     # move points if recalculate measure was successful
     def move_points(self, labels_cp=None, measure_cp=None):

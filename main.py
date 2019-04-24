@@ -38,158 +38,68 @@ from copy import deepcopy
 
 output_prefix = '.'
 
-def run_config(fname, data, index):
+def run_config(fname, data, index, algo):
     #print('Launching', fname, file=sys.stderr)
-    #today = datetime.datetime.now()
-    #print(today.strftime("%Y-%m-%d %H.%M.%S") ) # 2017-04-05-00.18.00
+    today = datetime.datetime.now()
+    print(today.strftime("%Y-%m-%d %H.%M.%S") ) # 2017-04-05-00.18.00
+    with open(fname, 'a') as result:
+        try:
+            X = []
+            with open(data, 'r') as f:
+                content = f.readlines()
+                for x in content:
+                    row = x.split()
+                    res = []
+                    for i in row:
+                        res.append(float(i))
+                    X.append(res)
 
-    try:
-        X = []
-        with open(data, 'r') as f:
-            content = f.readlines()
-            for x in content:
-                row = x.split()
-                res = []
-                for i in row:
-                    res.append(int(i))
-                X.append(res)
+            #n_clusters = 15
+            X1 = StandardScaler().fit_transform(np.array(X))
+            #connectivity = kneighbors_graph(X1, n_neighbors=2, include_self=False)
 
-        #n_clusters = 15
-        X1 = StandardScaler().fit_transform(np.array(X))
-        #connectivity = kneighbors_graph(X1, n_neighbors=2, include_self=False)
-
-
-        for k in range(0, 9):
-            res = cluster.SpectralClustering(random_state=k, eigen_solver="arpack", affinity="nearest_neighbors").fit(X1)
-
+            res = cluster.SpectralClustering(eigen_solver="arpack", affinity="nearest_neighbors").fit(X1)
             labels = res.labels_
             n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
 
             cl = clusterization(X1, labels, n_clusters, index)
             m = cl.init_measure()
 
+            #iterable CVI computation
+            strategy = algo(deepcopy(cl), m)
+            new_measure_iter, iters, t = strategy.run()
+            #print('Launching iterable computation: ', fname, file=sys.stderr)
+            #result.write('Launching iterable computation: ' + fname)
+            result.write("Measure improvement   {}\n".format(abs(m - new_measure_iter)))
+            result.write("from                  {}\n".format(m))
+            result.write("to                    {}\n".format(new_measure_iter))
+            result.write("Iterations performed  {}\n".format(iters))
+            result.write("Time spent            {}\n".format(t))
 
-            #Greedy
-            strategy = GreedyAlgorithm(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
+            # full CVI computation with time limit
+            strategy = algo(deepcopy(cl), m)
+            new_measure_full, iters, t = strategy.run_full()
+            #print('Launching full without CVI limit: ', fname, file=sys.stderr)
+            #result.write('Launching full without CVI limit: ' + fname)
+            result.write("Measure improvement   {}\n".format(abs(m - new_measure_full)))
+            result.write("from                  {}\n".format(m))
+            result.write("to                    {}\n".format(new_measure_full))
+            result.write("Iterations performed  {}\n".format(iters))
+            result.write("Time spent            {}\n".format(t))
 
-            with open(fname + '-greedy.txt', 'a') as result:
-                print('Launching', fname + '-greedy.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-            #1+1
-            strategy = EvoOnePlusOne(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
-            with open(fname + '-one_plus_one.txt', 'a') as result:
-                print('Launching', fname + '-one_plus_one.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-            #1+4
-            strategy = EvoOnePlusFour(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
-            with open(fname + '-one_plus_four.txt', 'a') as result:
-                print('Launching', fname + '-one_plus_four.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-        for k in range(0, 9):
-            res = cluster.KMeans(random_state=k).fit(X1)
-
-            labels = res.labels_
-            n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-
-            cl = clusterization(X1, labels, n_clusters, index)
-            m = cl.init_measure()
-
-            # Greedy
-            strategy = GreedyAlgorithm(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
-
-            with open(fname + '-greedy.txt', 'a') as result:
-                print('Launching', fname + '-greedy.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-            # 1+1
-            strategy = EvoOnePlusOne(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
-            with open(fname + '-one_plus_one.txt', 'a') as result:
-                print('Launching', fname + '-one_plus_one.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-            # 1+4
-            strategy = EvoOnePlusFour(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
-            with open(fname + '-one_plus_four.txt', 'a') as result:
-                print('Launching', fname + '-one_plus_four.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-        for algo in cluster.Birch(), cluster.AgglomerativeClustering(linkage="average", affinity="cityblock"):
-            res = algo.fit(X1)
-
-            labels = res.labels_
-            n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-
-            cl = clusterization(X1, labels, n_clusters, index)
-            m = cl.init_measure()
-
-            # Greedy
-            strategy = GreedyAlgorithm(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
-
-            with open(fname + '-greedy.txt', 'a') as result:
-                print('Launching', fname + '-greedy.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-            # 1+1
-            strategy = EvoOnePlusOne(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
-            with open(fname + '-one_plus_one.txt', 'a') as result:
-                print('Launching', fname + '-one_plus_one.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-
-            # 1+4
-            strategy = EvoOnePlusFour(deepcopy(cl), m)
-            new_measure, iters, t = strategy.run()
-            with open(fname + '-one_plus_four.txt', 'a') as result:
-                print('Launching', fname + '-one_plus_four.txt', file=sys.stderr)
-                result.write("Measure improvement   {}\n".format(abs(m - new_measure)))
-                result.write("from                  {}\n".format(m))
-                result.write("to                    {}\n".format(new_measure))
-                result.write("Iterations performed  {}\n".format(iters))
-                result.write("Time spent            {}\n".format(t))
-    except:
-        traceback.print_exc(file=result)
+            # full CVI computation with measure limit on CVI value
+            # obtained from iterable computation launch
+            strategy = algo(deepcopy(cl), m)
+            new_measure_full_CVI_limit, iters, t = strategy.run_full_CVI_limit(new_measure_iter)
+            #print('Launching full with CVI limit: ', fname, file=sys.stderr)
+            #result.write('Launching full with CVI limit: ' + fname)
+            result.write("Measure improvement   {}\n".format(abs(m - new_measure_full_CVI_limit)))
+            result.write("from                  {}\n".format(m))
+            result.write("to                    {}\n".format(new_measure_full_CVI_limit))
+            result.write("Iterations performed  {}\n".format(iters))
+            result.write("Time spent            {}\n".format(t))
+        except:
+            traceback.print_exc(file=result)
 
 
 # global counters
@@ -229,24 +139,21 @@ def run_config(fname, data, index):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print('Total', len(tasks), 'tasks to run')
-        for i in range(len(tasks)):
-            print(i, tasks[i][0])
-    elif len(sys.argv) == 2:
-        print(tasks[int(sys.argv[1])][1])
-    else:
-        output_prefix = sys.argv[2]
-        # 2 processes run 1-thread algorithms and 1 process runs a (1 + 4) EA
-        #with Pool(3, init, (Value('i', 0), Value('i', 0))) as pool:
-        #    pool.map(run_tasks, range(3))
-        eval(tasks[int(sys.argv[1])][1])
+    # if len(sys.argv) == 1:
+    #     print('Total', len(tasks), 'tasks to run')
+    #     for i in range(len(tasks)):
+    #         print(i, tasks[i][0])
+    # elif len(sys.argv) == 2:
+    #     print(tasks[int(sys.argv[1])][1])
+    # else:
+    #     output_prefix = sys.argv[2]
+    #     eval(tasks[int(sys.argv[1])][1])
 
 
-    # for i in range(len(tasks)):
-    #     print(tasks[i][0])
-    #     output_prefix = '.'
-    #     eval(tasks[i][1])
+    for i in range(len(tasks)):
+        print(tasks[i][0])
+        output_prefix = '.'
+        eval(tasks[i][1])
 
 
 # indicies = [gD33.Index(), gD43.Index(), gD31.Index(),

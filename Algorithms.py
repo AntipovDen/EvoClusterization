@@ -67,6 +67,48 @@ class GreedyAlgorithm:
             iter += 1
         return self.measure, iter, process_time() - start_time
 
+    def run_full(self):
+        start_time = process_time()
+        mutation_rate = 1
+        iter = 0
+        while True:
+            # candidates for the mutation
+            #print("iteration\t{}".format(iter))
+            #print("measure\t\t{}".format(self.measure))
+            centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
+            to_mutate = n_mins(centroid_distances, mutation_rate)
+            #print("mutation\t{}".format(to_mutate))
+            # mutation itself
+            new_measure = self.clusterization.recalculate_full_measure(to_mutate, centroids_numbers)
+            if new_measure >= self.measure:
+                break
+            self.clusterization.move_points()
+            self.measure = new_measure
+            mutation_rate *= 2
+            iter += 1
+        return self.measure, iter, process_time() - start_time
+
+    def run_full_CVI_limit(self, CVI_limit):
+        start_time = process_time()
+        mutation_rate = 1
+        iter = 0
+        while ((process_time() - start_time < 1500)) and (self.measure > CVI_limit):
+            # candidates for the mutation
+            #print("iteration\t{}".format(iter))
+            #print("measure\t\t{}".format(self.measure))
+            centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
+            to_mutate = n_mins(centroid_distances, mutation_rate)
+            #print("mutation\t{}".format(to_mutate))
+            # mutation itself
+            new_measure = self.clusterization.recalculate_full_measure(to_mutate, centroids_numbers)
+            if new_measure >= self.measure:
+                break
+            self.clusterization.move_points()
+            self.measure = new_measure
+            mutation_rate *= 2
+            iter += 1
+        return self.measure, iter, process_time() - start_time
+
 
 class EvoOnePlusOne:
     def __init__(self, clusterization, measure=None):
@@ -111,6 +153,77 @@ class EvoOnePlusOne:
             # print("Iteration " + str(self.measure))
         return self.measure, iter, process_time() - start_time
 
+    def run_full(self):
+        start_time = process_time()
+        mutation_rate = 1
+        iter = 0
+        while process_time() - start_time < 300:  # TODO think about the stopping criterion, now it is 5 minutes time
+            # candidates for the mutation
+            #print("iteration\t{}".format(iter))
+            #print("measure\t\t{}".format(self.measure))
+            centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
+
+            # calculating the probabilities for the points to be moved
+            sum_of_distances = sum(1/i for i in centroid_distances)
+            probabilities = [(1 / i) / sum_of_distances for i in centroid_distances]
+
+            # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
+            to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
+            #print("mutation\t{}".format(to_mutate))
+
+            new_measure = self.clusterization.recalculate_full_measure(to_mutate, [centroids_numbers[point] for point in to_mutate])
+            #print("new measure\t{}".format(new_measure))
+
+            if new_measure > self.measure:
+                mutation_rate = min(mutation_rate * 2 ** 0.25, len(self.clusterization.labels) / 2)
+                #print("declined")
+            elif new_measure <= self.measure:
+                mutation_rate = max(mutation_rate / 2, 1)
+                #print("accepted")
+                self.measure = new_measure
+                self.clusterization.move_points()
+
+            #print("new rate\t{}".format(mutation_rate))
+            iter += 1
+            # print("Iteration " + str(self.measure))
+        return self.measure, iter, process_time() - start_time
+
+    def run_full_CVI_limit(self, CVI_limit):
+        start_time = process_time()
+        mutation_rate = 1
+        iter = 0
+        while (process_time() - start_time < 1500) and (self.measure > CVI_limit):  # TODO think about the stopping criterion, now it is 5 minutes time
+            # candidates for the mutation
+            # print("iteration\t{}".format(iter))
+            # print("measure\t\t{}".format(self.measure))
+            centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
+
+            # calculating the probabilities for the points to be moved
+            sum_of_distances = sum(1 / i for i in centroid_distances)
+            probabilities = [(1 / i) / sum_of_distances for i in centroid_distances]
+
+            # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
+            to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
+            # print("mutation\t{}".format(to_mutate))
+
+            new_measure = self.clusterization.recalculate_full_measure(to_mutate, [centroids_numbers[point] for point in
+                                                                                   to_mutate])
+            # print("new measure\t{}".format(new_measure))
+
+            if new_measure > self.measure:
+                mutation_rate = min(mutation_rate * 2 ** 0.25, len(self.clusterization.labels) / 2)
+                # print("declined")
+            elif new_measure <= self.measure:
+                mutation_rate = max(mutation_rate / 2, 1)
+                # print("accepted")
+                self.measure = new_measure
+                self.clusterization.move_points()
+
+            # print("new rate\t{}".format(mutation_rate))
+            iter += 1
+            # print("Iteration " + str(self.measure))
+        return self.measure, iter, process_time() - start_time
+
 
 class EvoOnePlusFour:
     def __init__(self, clusterization, measure = None):
@@ -141,6 +254,27 @@ class EvoOnePlusFour:
         # Notice: clusterization.recalculated_measure_parallel returns not only new measure, but the copy of the
         # labels and of the measure.
 
+    def mutation_full(self, mutation_rate):
+        # this function must generate a mutation, calculate the change in the
+        # measure and return the new measure, the array of the moved points and the array of the clusters which
+        # these points were moved to.
+        start_time = process_time()
+        try:
+            centroids_numbers, centroid_distances = self.clusterization.get_nearest_centroids()
+
+            # calculating the probabilities for the points to be moved
+            sum_of_distances = sum(1 / i for i in centroid_distances)
+            probabilities = [(1 / i) / sum_of_distances for i in centroid_distances]
+
+            # choosing each point with probability that is inversely proportional to its distance to the nearest cluster
+            to_mutate = choice(list(range(len(centroids_numbers))), int(ceil(mutation_rate)), False, probabilities)
+            return (*self.clusterization.recalculated_measure_parallel_full(to_mutate, [centroids_numbers[point] for point in to_mutate])), process_time() - start_time
+        except MemoryError:
+            print("Thread with mutation rate {} has tragically died".format(mutation_rate), file=stderr)
+            return float_info.max, None, None, process_time() - start_time
+        # Notice: clusterization.recalculated_measure_parallel returns not only new measure, but the copy of the
+        # labels and of the measure.
+
     def run(self):
         spent_time = 0
         iter = 0
@@ -163,5 +297,52 @@ class EvoOnePlusFour:
                 self.measure = offspring[best_offspring][0]
             iter += 1
             spent_time += process_time() - start_time + sum(offspring[i][-1] for i in range(4))
-        return self.measure, iter, process_time() - start_time
+        return self.measure, iter, spent_time #process_time() - start_time
 
+    def run_full(self):
+        spent_time = 0
+        iter = 0
+        offspring = None
+        while spent_time < 300 * 4:  # TODO think about the stopping criterion, now it is 5 minutes time
+            start_time = process_time()
+            del offspring
+            gc.collect()
+            # print("garbage collector must have done its work")
+
+            with Pool(4) as pool:
+                offspring = pool.map(self.mutation_full, [2 ** i for i in range(4)]) # creating four offspring in parallel threads
+
+
+            best_offspring = argmin([child[0] for child in offspring])
+            if offspring[best_offspring][0] <= self.measure:
+                self.clusterization.move_points(*offspring[best_offspring][1:3])  # actually moving the points, since
+                                                                                 # we do not really do it in the
+                                                                                 # mutation phase.
+                self.measure = offspring[best_offspring][0]
+            iter += 1
+            spent_time += process_time() - start_time + sum(offspring[i][-1] for i in range(4))
+        return self.measure, iter, spent_time #process_time() - start_time
+
+    def run_full_CVI_limit(self, CVI_limit):
+        spent_time = 0
+        iter = 0
+        offspring = None
+        while (spent_time < 1500 * 4) and (self.measure > CVI_limit):  # TODO think about the stopping criterion, now it is 5 minutes time
+            start_time = process_time()
+            del offspring
+            gc.collect()
+            # print("garbage collector must have done its work")
+
+            with Pool(4) as pool:
+                offspring = pool.map(self.mutation_full, [2 ** i for i in range(4)]) # creating four offspring in parallel threads
+
+
+            best_offspring = argmin([child[0] for child in offspring])
+            if offspring[best_offspring][0] <= self.measure:
+                self.clusterization.move_points(*offspring[best_offspring][1:3])  # actually moving the points, since
+                                                                                 # we do not really do it in the
+                                                                                 # mutation phase.
+                self.measure = offspring[best_offspring][0]
+            iter += 1
+            spent_time += process_time() - start_time + sum(offspring[i][-1] for i in range(4))
+        return self.measure, iter, spent_time #process_time() - start_time
