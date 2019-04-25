@@ -38,7 +38,7 @@ from copy import deepcopy
 
 output_prefix = '.'
 
-def run_config(fname, data, index, algo):
+def run_config(fname, data, index, algo, run_num):
     #print('Launching', fname, file=sys.stderr)
     today = datetime.datetime.now()
     print(today.strftime("%Y-%m-%d %H.%M.%S") ) # 2017-04-05-00.18.00
@@ -68,6 +68,11 @@ def run_config(fname, data, index, algo):
             #iterable CVI computation
             strategy = algo(deepcopy(cl), m)
             new_measure_iter, iters, t = strategy.run()
+
+            # print number of run
+
+            result.write("Run {}\n".format((run_num + 1)))
+
             #print('Launching iterable computation: ', fname, file=sys.stderr)
             #result.write('Launching iterable computation: ' + fname)
             result.write("Measure improvement   {}\n".format(abs(m - new_measure_iter)))
@@ -97,7 +102,7 @@ def run_config(fname, data, index, algo):
             result.write("from                  {}\n".format(m))
             result.write("to                    {}\n".format(new_measure_full_CVI_limit))
             result.write("Iterations performed  {}\n".format(iters))
-            result.write("Time spent            {}\n".format(t))
+            result.write("Time spent            {}\n\n".format(t))
         except:
             traceback.print_exc(file=result)
 
