@@ -38,7 +38,7 @@ from copy import deepcopy
 
 output_prefix = '.'
 
-def run_config(fname, data, index, algo, run_num):
+def run_config(fname, data, index, algo):
     #print('Launching', fname, file=sys.stderr)
     today = datetime.datetime.now()
     print(today.strftime("%Y-%m-%d %H.%M.%S") ) # 2017-04-05-00.18.00
@@ -65,44 +65,45 @@ def run_config(fname, data, index, algo, run_num):
             cl = clusterization(X1, labels, n_clusters, index)
             m = cl.init_measure()
 
-            #iterable CVI computation
-            strategy = algo(deepcopy(cl), m)
-            new_measure_iter, iters, t = strategy.run()
+            for run_num in range(0, 3):
+                #iterable CVI computation
+                strategy = algo(deepcopy(cl), m)
+                new_measure_iter, iters, t = strategy.run()
 
-            # print number of run
+                # print number of run
 
-            result.write("Run {}\n".format((run_num + 1)))
+                result.write("Run {}\n".format((run_num + 1)))
 
-            #print('Launching iterable computation: ', fname, file=sys.stderr)
-            #result.write('Launching iterable computation: ' + fname)
-            result.write("Measure improvement   {}\n".format(abs(m - new_measure_iter)))
-            result.write("from                  {}\n".format(m))
-            result.write("to                    {}\n".format(new_measure_iter))
-            result.write("Iterations performed  {}\n".format(iters))
-            result.write("Time spent            {}\n".format(t))
+                #print('Launching iterable computation: ', fname, file=sys.stderr)
+                #result.write('Launching iterable computation: ' + fname)
+                result.write("Measure improvement   {}\n".format(abs(m - new_measure_iter)))
+                result.write("from                  {}\n".format(m))
+                result.write("to                    {}\n".format(new_measure_iter))
+                result.write("Iterations performed  {}\n".format(iters))
+                result.write("Time spent            {}\n".format(t))
 
-            # full CVI computation with time limit
-            strategy = algo(deepcopy(cl), m)
-            new_measure_full, iters, t = strategy.run_full()
-            #print('Launching full without CVI limit: ', fname, file=sys.stderr)
-            #result.write('Launching full without CVI limit: ' + fname)
-            result.write("Measure improvement   {}\n".format(abs(m - new_measure_full)))
-            result.write("from                  {}\n".format(m))
-            result.write("to                    {}\n".format(new_measure_full))
-            result.write("Iterations performed  {}\n".format(iters))
-            result.write("Time spent            {}\n".format(t))
+                # full CVI computation with time limit
+                strategy = algo(deepcopy(cl), m)
+                new_measure_full, iters, t = strategy.run_full()
+                #print('Launching full without CVI limit: ', fname, file=sys.stderr)
+                #result.write('Launching full without CVI limit: ' + fname)
+                result.write("Measure improvement   {}\n".format(abs(m - new_measure_full)))
+                result.write("from                  {}\n".format(m))
+                result.write("to                    {}\n".format(new_measure_full))
+                result.write("Iterations performed  {}\n".format(iters))
+                result.write("Time spent            {}\n".format(t))
 
-            # full CVI computation with measure limit on CVI value
-            # obtained from iterable computation launch
-            strategy = algo(deepcopy(cl), m)
-            new_measure_full_CVI_limit, iters, t = strategy.run_full_CVI_limit(new_measure_iter)
-            #print('Launching full with CVI limit: ', fname, file=sys.stderr)
-            #result.write('Launching full with CVI limit: ' + fname)
-            result.write("Measure improvement   {}\n".format(abs(m - new_measure_full_CVI_limit)))
-            result.write("from                  {}\n".format(m))
-            result.write("to                    {}\n".format(new_measure_full_CVI_limit))
-            result.write("Iterations performed  {}\n".format(iters))
-            result.write("Time spent            {}\n\n".format(t))
+                # full CVI computation with measure limit on CVI value
+                # obtained from iterable computation launch
+                strategy = algo(deepcopy(cl), m)
+                new_measure_full_CVI_limit, iters, t = strategy.run_full_CVI_limit(new_measure_iter)
+                #print('Launching full with CVI limit: ', fname, file=sys.stderr)
+                #result.write('Launching full with CVI limit: ' + fname)
+                result.write("Measure improvement   {}\n".format(abs(m - new_measure_full_CVI_limit)))
+                result.write("from                  {}\n".format(m))
+                result.write("to                    {}\n".format(new_measure_full_CVI_limit))
+                result.write("Iterations performed  {}\n".format(iters))
+                result.write("Time spent            {}\n\n".format(t))
         except:
             traceback.print_exc(file=result)
 

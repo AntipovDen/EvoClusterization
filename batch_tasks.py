@@ -60,7 +60,7 @@ def get_file_name(data, index, algo):
 
 # tasks = [('state-of-the-art.txt', 'run_state_of_the_art([datas, indices])')]
 
-number_of_runs = 3
+#number_of_runs = 3
 
 tasks = []
 # for data_name, data in datas:
@@ -70,9 +70,9 @@ tasks = []
 #                 fname = get_file_name(data_name, index_name, algo_name, init_name)
 #                 tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {}, {}, {})".format(fname,
 #                                                                                                 data, index, algo, init)))
-for run_num in range(0, number_of_runs):
-    for data_name, data in datas:
-        for index_name, index in indices:
-            for algo_name, algo in algos:
-                fname = get_file_name(data_name, index_name, algo_name)
-                tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {}, {}, {})".format(fname, data, index, algo, run_num)))
+#for run_num in range(0, number_of_runs):
+for data_name, data in datas:
+    for index_name, index in indices:
+        for algo_name, algo in algos:
+            fname = get_file_name(data_name, index_name, algo_name)
+            tasks.append((fname, "run_config(output_prefix+ '/' + '{}', '{}', {}, {})".format(fname, data, index, algo)))
