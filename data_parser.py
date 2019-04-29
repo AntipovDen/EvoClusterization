@@ -10,6 +10,9 @@ def read_run(file):
 
 
 data_dir = 'output'
+approaches = ['iterative', 'full', 'full_long']
+algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
+algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
 runs_per_config = 3
 data_improvements = dict()
 data_iterations = dict()
@@ -31,8 +34,6 @@ for filename in listdir(data_dir):
         f.readline()
         f.readline()
         res += [read_run(f) for _ in range(3)]
-
-    approaches = ['iterative', 'full', 'full_long']
 
     for i in range(3):
         res_approach = [res[j * 3 + i] for j in range(runs_per_config)]
@@ -82,9 +83,7 @@ def print_histogram(means, ticks=[], plotname="", iters = None):
 \end{tikzpicture}'''
     return s
 
-def print_boxplot(measure):
-    algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
-    algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
+def print_boxplot_imrovement(measure):
     s ='''\\begin{{tikzpicture}}
 \\begin{{axis}}[
     title={},
@@ -129,11 +128,56 @@ def print_boxplot(measure):
     return s
 
 
+def print_boxplot_iterations(dataset, measure):
+    s = '''\\begin{{tikzpicture}}
+    \\begin{{axis}}[
+        title={},
+        boxplot/draw direction=y,
+        ylabel=Iterations performed,
+        axis y line=left,
+        enlarge y limits,
+        ymajorgrids,
+        xtick={{{}}},
+        xticklabels={{{}}},
+        x tick label style={{rotate=45,anchor=east}},
+        /pgfplots/boxplot/whisker range={{3}},
+        /pgfplots/boxplot/every box/.style={{solid}},
+        /pgfplots/boxplot/every whisker/.style={{solid}},
+        /pgfplots/boxplot/every median/.style={{solid,thick}},
+        legend entries = {{{}}},
+        legend to name={{legend}},
+        legend style={{cells={{align=left}}}},
+        name=border
+    ]
+    '''.format('Measure: {}\\, Dataset: {}'.format(measure.replace('_', '\\_'), dataset.replace('_', '\\_')),
+               ', '.join([str(4 * i + 2) for i in range(len(list(data_improvements.keys())))]),
+               ', '.join(algo_names),
+               ', '.join(['iterative recalculation', 'full recalcualtion', 'full recalculation\\\\without time limit']))
+    colors = ['red', 'blue', 'black']
+    for i in range(3): #number of algo
+        for j in range(3): #number of approach
+            color = colors[j]
+            s += '''    \\addplot+ [{}, boxplot={{draw position={}}}, mark options={{solid,mark=square,fill=white,draw={}}}]
+            table [row sep=\\\\,y index=0] {{
+                data\\\\
+                {}\\\\
+        }};
+    '''.format(color, i * 4 + j + 1, color,
+               '\\\\ '.join([str(iterations) for iterations in data_iterations[dataset][measure][algo_ids[i] + '-' + approaches[j]]]))
+    s += '''\end{axis}
+    \\node[below right] at (border.north east) {\\ref{legend}};   
+    \end{tikzpicture}'''
+    return s
 
-measures = list(data_improvements[list(data_improvements.keys())[0]].keys())
-for measure in measures:
-    with open('plots/measure_{}.tex'.format(measure), 'w') as f:
-        f.write(print_boxplot(measure))
+# measures = list(data_improvements[list(data_improvements.keys())[0]].keys())
+# for measure in measures:
+#     with open('plots/measure_{}.tex'.format(measure), 'w') as f:
+#         f.write(print_boxplot_imrovement(measure))
+
+for dataset in data_iterations:
+    for measure in data_iterations[dataset]:
+        with open('plots/iters-{}-{}.tex'.format(dataset, measure), 'w') as f:
+            f.write(print_boxplot_iterations(dataset, measure))
 
 # for dataset in data:
 #     with open('plots/{}.tex'.format(dataset), 'w') as f:
