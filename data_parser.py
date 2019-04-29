@@ -6,7 +6,8 @@ def read_run(file):
     lines = [file.readline() for _ in range(5)]
     measure_improvement = float(lines[0].split()[-1])
     iterations = int(lines[3].split()[-1])
-    return measure_improvement, iterations
+    time_spent = float(lines[4].split()[-1])
+    return measure_improvement, iterations, time_spent
 
 
 data_dir = 'output'
@@ -16,14 +17,17 @@ algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
 runs_per_config = 3
 data_improvements = dict()
 data_iterations = dict()
+data_time = dict()
 for filename in listdir(data_dir):
     dataset, measure, algo = filename[:-4].split('-')
     if dataset not in data_improvements:
         data_improvements[dataset] = dict()
         data_iterations[dataset] = dict()
+        data_time[dataset] = dict()
     if measure not in data_improvements[dataset]:
         data_improvements[dataset][measure] = dict()
         data_iterations[dataset][measure] = dict()
+        data_time[dataset][measure] = dict()
     with open(data_dir + '/' + filename, 'r') as f:
         # print('Reading {}'.format(filename))
         f.readline()
@@ -40,8 +44,7 @@ for filename in listdir(data_dir):
         algo_specified = algo + '-' + approaches[i]
         data_improvements[dataset][measure][algo_specified] = [res_approach[k][0] for k in range(runs_per_config)]
         data_iterations[dataset][measure][algo_specified] = [res_approach[k][1] for k in range(runs_per_config)]
-
-
+        data_time[dataset][measure][algo_specified] = [res_approach[k][2] for k in range(runs_per_config)]
 
 
 def print_histogram(means, ticks=[], plotname="", iters = None):
@@ -82,6 +85,7 @@ def print_histogram(means, ticks=[], plotname="", iters = None):
 \end{axis}
 \end{tikzpicture}'''
     return s
+
 
 def print_boxplot_imrovement(measure):
     s ='''\\begin{{tikzpicture}}
@@ -169,20 +173,99 @@ def print_boxplot_iterations(dataset, measure):
     \end{tikzpicture}'''
     return s
 
-# measures = list(data_improvements[list(data_improvements.keys())[0]].keys())
-# for measure in measures:
-#     with open('plots/measure_{}.tex'.format(measure), 'w') as f:
-#         f.write(print_boxplot_imrovement(measure))
+def print_boxplot_iterations(dataset, measure):
+    s = '''\\begin{{tikzpicture}}
+    \\begin{{axis}}[
+        title={},
+        boxplot/draw direction=y,
+        ylabel=Iterations performed,
+        axis y line=left,
+        enlarge y limits,
+        ymajorgrids,
+        xtick={{{}}},
+        xticklabels={{{}}},
+        x tick label style={{rotate=45,anchor=east}},
+        /pgfplots/boxplot/whisker range={{3}},
+        /pgfplots/boxplot/every box/.style={{solid}},
+        /pgfplots/boxplot/every whisker/.style={{solid}},
+        /pgfplots/boxplot/every median/.style={{solid,thick}},
+        legend entries = {{{}}},
+        legend to name={{legend}},
+        legend style={{cells={{align=left}}}},
+        name=border
+    ]
+    '''.format('Measure: {}\\, Dataset: {}'.format(measure.replace('_', '\\_'), dataset.replace('_', '\\_')),
+               ', '.join([str(4 * i + 2) for i in range(len(list(data_improvements.keys())))]),
+               ', '.join(algo_names),
+               ', '.join(['iterative recalculation', 'full recalcualtion', 'full recalculation\\\\without time limit']))
+    colors = ['red', 'blue', 'black']
+    for i in range(3): #number of algo
+        for j in range(3): #number of approach
+            color = colors[j]
+            s += '''    \\addplot+ [{}, boxplot={{draw position={}}}, mark options={{solid,mark=square,fill=white,draw={}}}]
+            table [row sep=\\\\,y index=0] {{
+                data\\\\
+                {}\\\\
+        }};
+    '''.format(color, i * 4 + j + 1, color,
+               '\\\\ '.join([str(iterations) for iterations in data_iterations[dataset][measure][algo_ids[i] + '-' + approaches[j]]]))
+    s += '''\end{axis}
+    \\node[below right] at (border.north east) {\\ref{legend}};   
+    \end{tikzpicture}'''
+    return s
+
+def print_boxplot_time(dataset, measure):
+    s = '''\\begin{{tikzpicture}}
+    \\begin{{axis}}[
+        title={},
+        boxplot/draw direction=y,
+        ylabel=Time spent,
+        axis y line=left,
+        enlarge y limits,
+        ymajorgrids,
+        xtick={{{}}},
+        xticklabels={{{}}},
+        x tick label style={{rotate=45,anchor=east}},
+        /pgfplots/boxplot/whisker range={{3}},
+        /pgfplots/boxplot/every box/.style={{solid}},
+        /pgfplots/boxplot/every whisker/.style={{solid}},
+        /pgfplots/boxplot/every median/.style={{solid,thick}},
+        legend entries = {{{}}},
+        legend to name={{legend}},
+        legend style={{cells={{align=left}}}},
+        name=border
+    ]
+    '''.format('Measure: {}\\, Dataset: {}'.format(measure.replace('_', '\\_'), dataset.replace('_', '\\_')),
+               ', '.join([str(4 * i + 2) for i in range(len(list(data_improvements.keys())))]),
+               ', '.join(algo_names),
+               ', '.join(['iterative recalculation', 'full recalcualtion', 'full recalculation\\\\without time limit']))
+    colors = ['red', 'blue', 'black']
+    for i in range(3): #number of algo
+        for j in range(3): #number of approach
+            color = colors[j]
+            s += '''    \\addplot+ [{}, boxplot={{draw position={}}}, mark options={{solid,mark=square,fill=white,draw={}}}]
+            table [row sep=\\\\,y index=0] {{
+                data\\\\
+                {}\\\\
+        }};
+    '''.format(color, i * 4 + j + 1, color,
+               '\\\\ '.join([str(iterations) for iterations in data_time[dataset][measure][algo_ids[i] + '-' + approaches[j]]]))
+    s += '''\end{axis}
+    \\node[below right] at (border.north east) {\\ref{legend}};   
+    \end{tikzpicture}'''
+    return s
+
+measures = list(data_improvements[list(data_improvements.keys())[0]].keys())
+for measure in measures:
+    with open('plots/measure_{}.tex'.format(measure), 'w') as f:
+        f.write(print_boxplot_imrovement(measure))
 
 for dataset in data_iterations:
     for measure in data_iterations[dataset]:
         with open('plots/iters-{}-{}.tex'.format(dataset, measure), 'w') as f:
             f.write(print_boxplot_iterations(dataset, measure))
 
-# for dataset in data:
-#     with open('plots/{}.tex'.format(dataset), 'w') as f:
-#         for measure in data[dataset]:
-#             algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
-#             algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
-#             f.write(print_histogram(data[dataset][measure], algo_names, '\\, '.join([dataset, measure.replace('_', '\\_')])))
-#             f.write('\n\\hskip 10pt\n')
+for dataset in data_time:
+    for measure in data_time[dataset]:
+        with open('plots/times-{}-{}.tex'.format(dataset, measure), 'w') as f:
+            f.write(print_boxplot_time(dataset, measure))
