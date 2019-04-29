@@ -11,13 +11,16 @@ def read_run(file):
 
 data_dir = 'output'
 runs_per_config = 3
-data = dict()
+data_improvements = dict()
+data_iterations = dict()
 for filename in listdir(data_dir):
     dataset, measure, algo = filename[:-4].split('-')
-    if dataset not in data:
-        data[dataset] = dict()
-    if measure not in data[dataset]:
-        data[dataset][measure] = dict()
+    if dataset not in data_improvements:
+        data_improvements[dataset] = dict()
+        data_iterations[dataset] = dict()
+    if measure not in data_improvements[dataset]:
+        data_improvements[dataset][measure] = dict()
+        data_iterations[dataset][measure] = dict()
     with open(data_dir + '/' + filename, 'r') as f:
         # print('Reading {}'.format(filename))
         f.readline()
@@ -34,7 +37,10 @@ for filename in listdir(data_dir):
     for i in range(3):
         res_approach = [res[j * 3 + i] for j in range(runs_per_config)]
         algo_specified = algo + '-' + approaches[i]
-        data[dataset][measure][algo_specified] = [mean([res_approach[k][j] for k in range(runs_per_config)]) for j in range(2)]
+        data_improvements[dataset][measure][algo_specified] = [res_approach[k][0] for k in range(runs_per_config)]
+        data_iterations[dataset][measure][algo_specified] = [res_approach[k][1] for k in range(runs_per_config)]
+
+
 
 
 def print_histogram(means, ticks=[], plotname="", iters = None):
@@ -71,18 +77,68 @@ def print_histogram(means, ticks=[], plotname="", iters = None):
         s += '({}, {}) '.format(ticks[i], means[algos[i] + '-full_long'][0])
     s += '''
     };
-    \\legend{iterative recalculation,full recalculation,full with no time limit}
+    %\\legend{iterative recalculation,full recalculation,full with no time limit}
 \end{axis}
 \end{tikzpicture}'''
     return s
 
+def print_boxplot(measure):
+    algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
+    algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
+    s ='''\\begin{{tikzpicture}}
+\\begin{{axis}}[
+    title={},
+    boxplot/draw direction=y,
+    ylabel=Measure improvement,
+    axis y line=left,
+    enlarge y limits,
+    ymajorgrids,
+    xtick={{{}}},
+    xticklabels={{{}}},
+    x tick label style={{rotate=45,anchor=east}},
+    /pgfplots/boxplot/whisker range={{3}},
+    /pgfplots/boxplot/every box/.style={{solid}},
+    /pgfplots/boxplot/every whisker/.style={{solid}},
+    /pgfplots/boxplot/every median/.style={{solid,thick}},
+    legend entries = {{{}}},
+    legend to name={{legend}},
+    name=border
+]
+'''.format(measure.replace('_', '\\_'),
+           ', '.join([str(4 * i + 2) for i in range(len(list(data_improvements.keys())))]),
+           ', '.join([dataset for dataset in data_improvements]),
+           ', '.join(algo_names))
+    i = 0
+    for dataset in data_improvements:
+        j = 0
+        for algo in reversed(sorted(list(data_improvements[dataset][measure]))):
+            if 'iterative' in algo:
+                color = 'red' if 'greedy' in algo else 'blue' if 'evo_one_one' in algo else 'black'
+                print(algo, color)
+                s += '''    \\addplot+ [{}, boxplot={{draw position={}}}, mark options={{solid,mark=square,fill=white,draw={}}}]
+        table [row sep=\\\\,y index=0] {{
+            data\\\\
+            {}\\\\
+    }};
+'''.format(color, i * 4 + j + 1, color, '\\\\ '.join([str(improvement) for improvement in data_improvements[dataset][measure][algo]]))
+                j += 1
+        i += 1
+    s += '''\end{axis}
+\\node[below right=-2pt] at (border.north east) {\\ref{legend}};   
+\end{tikzpicture}'''
+    return s
 
-for dataset in data:
-    # print(data[dataset])
-    for measure in data[dataset]:
-        algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
-        algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
-        # mean_values = [data[dataset][measure][algo + '-iterative'][0] for algo in algo_ids]
-        print(print_histogram(data[dataset][measure], algo_names, '\\, '.join([dataset, measure.replace('_', '\\_')])))
-        print('\\hskip 10pt')
-    print('\\\\')
+
+
+measures = list(data_improvements[list(data_improvements.keys())[0]].keys())
+for measure in measures:
+    with open('plots/measure_{}.tex'.format(measure), 'w') as f:
+        f.write(print_boxplot(measure))
+
+# for dataset in data:
+#     with open('plots/{}.tex'.format(dataset), 'w') as f:
+#         for measure in data[dataset]:
+#             algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
+#             algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
+#             f.write(print_histogram(data[dataset][measure], algo_names, '\\, '.join([dataset, measure.replace('_', '\\_')])))
+#             f.write('\n\\hskip 10pt\n')
