@@ -191,13 +191,12 @@ def print_boxplot_iterations(dataset, measure):
         /pgfplots/boxplot/every median/.style={{solid,thick}},
         legend entries = {{{}}},
         legend to name={{legend}},
-        legend style={{cells={{align=left}}}},
         name=border
     ]
     '''.format('Measure: {}\\, Dataset: {}'.format(measure.replace('_', '\\_'), dataset.replace('_', '\\_')),
                ', '.join([str(4 * i + 2) for i in range(len(list(data_improvements.keys())))]),
                ', '.join(algo_names),
-               ', '.join(['iterative recalculation', 'full recalcualtion', 'full recalculation\\\\without time limit']))
+               ', '.join(['iterative recalculation', 'full recalcualtion', 'full recalculation without time limit']))
     colors = ['red', 'blue', 'black']
     for i in range(3): #number of algo
         for j in range(3): #number of approach
@@ -209,9 +208,12 @@ def print_boxplot_iterations(dataset, measure):
         }};
     '''.format(color, i * 4 + j + 1, color,
                '\\\\ '.join([str(iterations) for iterations in data_iterations[dataset][measure][algo_ids[i] + '-' + approaches[j]]]))
-    s += '''\end{axis}
-    \\node[below right] at (border.north east) {\\ref{legend}};   
-    \end{tikzpicture}'''
+    s += '\end{axis}\n'
+    if 'star' in measure:
+        s += '\\node[below=50pt, right] at (border.south west) {\\ref{legend}};\n'
+    elif 'silh' in measure:
+        s += '\\node[below=71pt, right] at (border.south west) {};\n'
+    s += '\end{tikzpicture}\n'
     return s
 
 def print_boxplot_time(dataset, measure):
