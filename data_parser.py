@@ -90,9 +90,12 @@ def print_histogram(means, ticks=[], plotname="", iters = None):
 
 
 def print_boxplot_imrovement(measure):
-    s ='''\\begin{{tikzpicture}}
+    s ='''\\begin{{tikzpicture}}[trim axis left]
 \\begin{{axis}}[
     title={},
+    scale only axis,
+    height=5cm,
+    width=0.8\\textwidth,
     boxplot/draw direction=y,
     ylabel=Measure improvement,
     axis y line=left,
@@ -130,7 +133,7 @@ def print_boxplot_imrovement(measure):
                 j += 1
         i += 1
     s += '''\end{axis}
-\\node[below right, xshift=-10pt] at (border.north east) {\\ref{legend}};   
+\\node[below right] at (border.north east) {\\ref{legend}};   
 \end{tikzpicture}'''
     return s
 
