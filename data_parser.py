@@ -108,26 +108,27 @@ def print_boxplot_imrovement(measure):
     name=border
 ]
 '''.format(measure.replace('_', '\\_'),
-           ', '.join([str(4 * i + 2) for i in range(len(list(data_improvements.keys())))]),
+           ', '.join([str(7 * i + 3.5) for i in range(len(list(data_improvements.keys())))]),
            ', '.join([dataset for dataset in data_improvements]),
-           ', '.join(algo_names))
+           ', '.join([name + ', ' + name + '*' for name in algo_names]))
+    colors = ['red', 'blue', 'black', 'green', 'orange', 'purple']
     i = 0
     for dataset in data_improvements:
         j = 0
         for algo in reversed(sorted(list(data_improvements[dataset][measure]))):
-            if 'iterative' in algo:
-                color = 'red' if 'greedy' in algo else 'blue' if 'evo_one_one' in algo else 'black'
+            if 'iterative' in algo or 'full_long' in algo:
+                color = colors[j]
                 print(algo, color)
                 s += '''    \\addplot+ [{}, boxplot={{draw position={}}}, mark options={{solid,mark=square,fill=white,draw={}}}]
         table [row sep=\\\\,y index=0] {{
             data\\\\
             {}\\\\
     }};
-'''.format(color, i * 4 + j + 1, color, '\\\\ '.join([str(improvement) for improvement in data_improvements[dataset][measure][algo]]))
+'''.format(color, i * 7 + j + 1, color, '\\\\ '.join([str(improvement) for improvement in data_improvements[dataset][measure][algo]]))
                 j += 1
         i += 1
     s += '''\end{axis}
-\\node[below right=-2pt] at (border.north east) {\\ref{legend}};   
+\\node[below right, xshift=-10pt] at (border.north east) {\\ref{legend}};   
 \end{tikzpicture}'''
     return s
 
