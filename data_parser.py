@@ -230,28 +230,18 @@ def print_boxplot_time(dataset, measure):
         /pgfplots/boxplot/every box/.style={{solid}},
         /pgfplots/boxplot/every whisker/.style={{solid}},
         /pgfplots/boxplot/every median/.style={{solid,thick}},
-        legend entries = {{{}}},
-        legend to name={{legend}},
-        legend style={{cells={{align=left}}}},
-        name=border
     ]
     '''.format('Measure: {}\\, Dataset: {}'.format(measure.replace('_', '\\_'), dataset.replace('_', '\\_')),
-               ', '.join([str(4 * i + 2) for i in range(len(list(data_improvements.keys())))]),
-               ', '.join(algo_names),
-               ', '.join(['iterative recalculation', 'full recalcualtion', 'full recalculation\\\\without time limit']))
-    colors = ['red', 'blue', 'black']
-    for i in range(3): #number of algo
-        for j in range(3): #number of approach
-            color = colors[j]
-            s += '''    \\addplot+ [{}, boxplot={{draw position={}}}, mark options={{solid,mark=square,fill=white,draw={}}}]
+               ', '.join([str(i + 1) for i in range(len(list(data_improvements.keys())))]),
+               ', '.join(algo_names))
+    for algo in algo_ids: #number of algo
+        s += '''    \\addplot+ [black, boxplot]
             table [row sep=\\\\,y index=0] {{
                 data\\\\
                 {}\\\\
         }};
-    '''.format(color, i * 4 + j + 1, color,
-               '\\\\ '.join([str(iterations) for iterations in data_time[dataset][measure][algo_ids[i] + '-' + approaches[j]]]))
+    '''.format('\\\\ '.join([str(iterations) for iterations in data_time[dataset][measure][algo + '-full_long']]))
     s += '''\end{axis}
-    \\node[below right] at (border.north east) {\\ref{legend}};   
     \end{tikzpicture}'''
     return s
 
