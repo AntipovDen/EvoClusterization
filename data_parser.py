@@ -14,7 +14,7 @@ data_dir = 'output'
 approaches = ['iterative', 'full', 'full_long']
 algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
 algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
-runs_per_config = 3
+runs_per_config = 10
 data_improvements = dict()
 data_iterations = dict()
 data_time = dict()
@@ -30,14 +30,16 @@ for filename in listdir(data_dir):
         data_time[dataset][measure] = dict()
     with open(data_dir + '/' + filename, 'r') as f:
         # print('Reading {}'.format(filename))
-        f.readline()
-        res = [read_run(f) for _ in range(3)]
-        f.readline()
-        f.readline()
-        res += [read_run(f) for _ in range(3)]
-        f.readline()
-        f.readline()
-        res += [read_run(f) for _ in range(3)]
+        res = []
+        for i in range(runs_per_config):
+            f.readline()
+            res += [read_run(f) for _ in range(3)]
+            f.readline()
+            # f.readline()
+            # res += [read_run(f) for _ in range(3)]
+            # f.readline()
+            # f.readline()
+            # res += [read_run(f) for _ in range(3)]
 
     for i in range(3):
         res_approach = [res[j * 3 + i] for j in range(runs_per_config)]
@@ -99,7 +101,7 @@ def print_boxplot_imrovement(measure):
     xtick={{{}}},
     xticklabels={{{}}},
     x tick label style={{rotate=45,anchor=east}},
-    /pgfplots/boxplot/whisker range={{3}},
+    /pgfplots/boxplot/whisker range={{100000000}},
     /pgfplots/boxplot/every box/.style={{solid}},
     /pgfplots/boxplot/every whisker/.style={{solid}},
     /pgfplots/boxplot/every median/.style={{solid,thick}},
@@ -145,7 +147,7 @@ def print_boxplot_iterations(dataset, measure):
         xtick={{{}}},
         xticklabels={{{}}},
         x tick label style={{rotate=45,anchor=east}},
-        /pgfplots/boxplot/whisker range={{3}},
+        /pgfplots/boxplot/whisker range={{100000000}},
         /pgfplots/boxplot/every box/.style={{solid}},
         /pgfplots/boxplot/every whisker/.style={{solid}},
         /pgfplots/boxplot/every median/.style={{solid,thick}},
@@ -186,7 +188,7 @@ def print_boxplot_iterations(dataset, measure):
         xtick={{{}}},
         xticklabels={{{}}},
         x tick label style={{rotate=45,anchor=east}},
-        /pgfplots/boxplot/whisker range={{3}},
+        /pgfplots/boxplot/whisker range={{100000000}},
         /pgfplots/boxplot/every box/.style={{solid}},
         /pgfplots/boxplot/every whisker/.style={{solid}},
         /pgfplots/boxplot/every median/.style={{solid,thick}},
