@@ -15,6 +15,7 @@ approaches = ['iterative', 'full', 'full_long']
 algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
 algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
 measure_shortname = {'calinski_harabaz' : 'ch', 'cop': 'cop', 'davies_bouldin_star': 'db*', 'silhouette': 'sil'}
+measures = ['calinski_harabaz', 'cop', 'davies_bouldin_star', 'silhouette']
 runs_per_config = 10
 data_improvements = dict()
 data_iterations = dict()
@@ -95,7 +96,7 @@ def print_boxplot_imrovement(measure):
 \\begin{{axis}}[
     title={},
     scale only axis,
-    height=5cm,
+    height=4cm,
     width=0.8\\textwidth,
     boxplot/draw direction=y,
     ylabel=Measure improvement,
@@ -114,23 +115,22 @@ def print_boxplot_imrovement(measure):
     name=border
 ]
 '''.format(measure.replace('_', '\\_'),
-           ', '.join([str(7 * i + 3.5) for i in range(len(list(data_improvements.keys())))]),
+           ', '.join([str(5 * i + 2.5) for i in range(len(list(data_improvements.keys())))]),
            ', '.join([dataset for dataset in data_improvements]),
-           ', '.join([name + ', ' + name + '*' for name in algo_names]))
-    colors = ['red', 'blue', 'black', 'green', 'orange', 'purple']
+           ', '.join([name + ', ' + name + '*' for name in algo_names if 'greedy' not in name]))
+    colors = ['red', 'blue', 'black', 'green']  # , 'orange', 'purple']
     i = 0
     for dataset in data_improvements:
         j = 0
         for algo in reversed(sorted(list(data_improvements[dataset][measure]))):
-            if 'iterative' in algo or 'full_long' in algo:
+            if 'long' not in algo and 'greedy' not in algo:
                 color = colors[j]
-                print(algo, color)
                 s += '''    \\addplot+ [{}, boxplot={{draw position={}}}, mark options={{solid,mark=square,fill=white,draw={}}}]
         table [row sep=\\\\,y index=0] {{
             data\\\\
             {}\\\\
     }};
-'''.format(color, i * 7 + j + 1, color, '\\\\ '.join([str(improvement) for improvement in data_improvements[dataset][measure][algo]]))
+'''.format(color, i * 5 + j + 1, color, '\\\\ '.join([str(improvement) for improvement in data_improvements[dataset][measure][algo]]))
                 j += 1
         i += 1
     s += '''\end{axis}
@@ -319,3 +319,7 @@ def print_table():
 
 with open('tables/improvement-table.tex', 'w') as f:
     f.write(print_table())
+
+for measure in measures:
+    with open('plots/measure_{}.tex'.format(measure), 'w') as f:
+        f.write(print_boxplot_imrovement(measure))
