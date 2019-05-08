@@ -1,6 +1,5 @@
 from os import listdir
-from numpy import mean
-
+from statistics import median, mean, stdev
 
 def read_run(file):
     lines = [file.readline() for _ in range(5)]
@@ -14,6 +13,7 @@ data_dir = 'output'
 approaches = ['iterative', 'full', 'full_long']
 algo_names = ['greedy', '$(1 + 1)$', '$(1 + 4)$']
 algo_ids = ['greedy', 'evo_one_one', 'evo_one_four']
+measure_shortname = {'calinski_harabaz' : 'ch', 'cop': 'cop', 'davies_bouldin_star': 'db*', 'silhouette': 'sil'}
 runs_per_config = 10
 data_improvements = dict()
 data_iterations = dict()
@@ -156,47 +156,6 @@ def print_boxplot_iterations(dataset, measure):
         /pgfplots/boxplot/every median/.style={{solid,thick}},
         legend entries = {{{}}},
         legend to name={{legend}},
-        legend style={{cells={{align=left}}}},
-        name=border
-    ]
-    '''.format('Measure: {}\\, Dataset: {}'.format(measure.replace('_', '\\_'), dataset.replace('_', '\\_')),
-               ', '.join([str(4 * i + 2) for i in range(len(list(data_improvements.keys())))]),
-               ', '.join(algo_names),
-               ', '.join(['iterative recalculation', 'full recalcualtion', 'full recalculation\\\\without time limit']))
-    colors = ['red', 'blue', 'black']
-    for i in range(3): #number of algo
-        for j in range(3): #number of approach
-            color = colors[j]
-            s += '''    \\addplot+ [{}, boxplot={{draw position={}}}, mark options={{solid,mark=square,fill=white,draw={}}}]
-            table [row sep=\\\\,y index=0] {{
-                data\\\\
-                {}\\\\
-        }};
-    '''.format(color, i * 4 + j + 1, color,
-               '\\\\ '.join([str(iterations) for iterations in data_iterations[dataset][measure][algo_ids[i] + '-' + approaches[j]]]))
-    s += '''\end{axis}
-    \\node[below right] at (border.north east) {\\ref{legend}};   
-    \end{tikzpicture}'''
-    return s
-
-def print_boxplot_iterations(dataset, measure):
-    s = '''\\begin{{tikzpicture}}
-    \\begin{{axis}}[
-        title={},
-        boxplot/draw direction=y,
-        ylabel=Iterations performed,
-        axis y line=left,
-        enlarge y limits,
-        ymajorgrids,
-        xtick={{{}}},
-        xticklabels={{{}}},
-        x tick label style={{rotate=45,anchor=east}},
-        /pgfplots/boxplot/whisker range={{100000000}},
-        /pgfplots/boxplot/every box/.style={{solid}},
-        /pgfplots/boxplot/every whisker/.style={{solid}},
-        /pgfplots/boxplot/every median/.style={{solid,thick}},
-        legend entries = {{{}}},
-        legend to name={{legend}},
         name=border
     ]
     '''.format('Measure: {}\\, Dataset: {}'.format(measure.replace('_', '\\_'), dataset.replace('_', '\\_')),
@@ -221,6 +180,7 @@ def print_boxplot_iterations(dataset, measure):
         s += '\\node[below=71pt, right] at (border.south west) {};\n'
     s += '\end{tikzpicture}\n'
     return s
+
 
 def print_boxplot_time(dataset, measure):
     s = '''\\begin{{tikzpicture}}
@@ -267,17 +227,82 @@ def print_boxplot_time(dataset, measure):
     s += '\end{tikzpicture}\n'
     return s
 
-measures = list(data_improvements[list(data_improvements.keys())[0]].keys())
-for measure in measures:
-    with open('plots/measure_{}.tex'.format(measure), 'w') as f:
-        f.write(print_boxplot_imrovement(measure))
 
-for dataset in data_iterations:
-    for measure in data_iterations[dataset]:
-        with open('plots/iters-{}-{}.tex'.format(dataset, measure), 'w') as f:
-            f.write(print_boxplot_iterations(dataset, measure))
+def is_successful(dataset, measure):
+    for algo in data_improvements[dataset][measure]:
+        if 'iterative' in algo or 'full_long' in algo:
+            for i in data_improvements[dataset][measure][algo]:
+                if i != 0:
+                    return True
+    return False
 
-for dataset in data_time:
-    for measure in data_time[dataset]:
-        with open('plots/times-{}-{}.tex'.format(dataset, measure), 'w') as f:
-            f.write(print_boxplot_time(dataset, measure))
+
+def median_data(dataset, measure, algo): # median value of improvement by full recalculation
+    res = [data_improvements[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
+    if len(res) == 0:
+        return '---'
+    return '{:.3g}'.format(median(res))
+
+
+def mean_data(dataset, measure, algo): # median value of improvement by full recalculation
+    res = [data_improvements[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
+    if len(res) == 0:
+        return '---'
+    return '{:.3g}'.format(mean(res))
+
+
+def deviation_data(dataset, measure, algo): # median value of improvement by full recalculation
+    res = [data_improvements[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
+    if len(res) == 0:
+        return '---'
+    return '{:.3g}'.format(stdev(res))
+
+
+def percent_success_data(dataset, measure, algo): # median value of improvement by full recalculation
+    res = [data_improvements[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
+    if len(res) == 0:
+        return '---'
+    return '{:.3g}'.format(stdev(res))
+
+
+def print_table():
+    # unsuccessful_settings = ((dataset, measure) for dataset in data_improvements for measure in data_improvements[dataset] if not is_successful(dataset, measure))
+    # for i in unsuccessful_settings:
+    #     print(i)
+    s = '''\\begin{tabular}{|c|c|rr|rr|rr|rr|}
+  \\hline
+  \\multirow{2}{*}{Dataset} & \\multirow{2}{*}{Measure} & \\multicolumn{2}{c|}{Median} & \\multicolumn{2}{c|}{Mean} & \\multicolumn{2}{c|}{Deviation} & \\multicolumn{2}{c|}{\\% of successful runs} \\\\ \\cline{3-10}
+  & & $(1 + 1)$ & $(1 + 4)$ & $(1 + 1)$ & $(1 + 4)$ & $(1 + 1)$ & $(1 + 4)$ & $(1 + 1)$ & $(1 + 4)$  \\\\ \\hline
+'''
+    for dataset in data_improvements:
+        s += '  \\parbox[t]{{2mm}}{{\multirow{{3}}{{*}}{{\\rotatebox[origin=c]{{90}}{{{}}}}}}}'.format(dataset.replace('_', '\\_'))
+        for measure in sorted(list(data_improvements[dataset])):
+            s += ' & {} & '.format(measure_shortname[measure])
+            s += ' & '.join([median_data(dataset, measure, algo) for algo in algo_ids if 'evo' in algo])
+            s += ' & '
+            s += ' & '.join([mean_data(dataset, measure, algo) for algo in algo_ids if 'evo' in algo])
+            s += ' & '
+            s += ' & '.join([deviation_data(dataset, measure, algo) for algo in algo_ids if 'evo' in algo])
+            s += ' & '
+            s += ' & '.join([percent_success_data(dataset, measure, algo) for algo in algo_ids if 'evo' in algo])
+            s += ' \\\\\n'
+        s += '\\hline\n'
+    return s + '\end{tabular}\n'
+
+
+with open('tables/improvement-table.tex', 'w') as f:
+    f.write(print_table())
+# measures = list(data_improvements[list(data_improvements.keys())[0]].keys())
+# for measure in measures:
+#     with open('plots/measure_{}.tex'.format(measure), 'w') as f:
+#         f.write(print_boxplot_imrovement(measure))
+#
+# for dataset in data_iterations:
+#     for measure in data_iterations[dataset]:
+#         with open('plots/iters-{}-{}.tex'.format(dataset, measure), 'w') as f:
+#             f.write(print_boxplot_iterations(dataset, measure))
+#
+# for dataset in data_time:
+#     for measure in data_time[dataset]:
+#         with open('plots/times-{}-{}.tex'.format(dataset, measure), 'w') as f:
+#             f.write(print_boxplot_time(dataset, measure))
