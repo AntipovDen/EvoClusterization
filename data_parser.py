@@ -1,3 +1,4 @@
+from math import sqrt
 from os import listdir
 from statistics import median, mean, stdev
 
@@ -237,6 +238,7 @@ def is_successful(dataset, measure):
     return False
 
 
+# not needed
 def median_data(dataset, measure, algo): # median value of improvement by full recalculation
     res = [data_improvements[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
     if len(res) == 0:
@@ -245,41 +247,64 @@ def median_data(dataset, measure, algo): # median value of improvement by full r
 
 
 def mean_data(dataset, measure, algo): # median value of improvement by full recalculation
-    res = [data_improvements[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
-    if len(res) == 0:
+    valid_runs = len([i for i in data_iterations[dataset][measure][algo + '-full_long'] if i > 0])
+    res = [data_time[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
+    if valid_runs == 0:
         return '---'
-    return '{:.3g}'.format(mean(res))
+    max_time = 25 * 60 if algo != 'evo_one_four' else 25 * 60 * 4
+    successful_runs = len([i for i in res if i <= max_time])
+    if successful_runs == 0:
+        return '$>{}$'.format(max_time // 60)
+    r = successful_runs / valid_runs
+    m = mean([i for i in res if i <= max_time]) + (1 - r) / r * max_time
+    return '${:.3g}$'.format(m / 60)
 
 
 def deviation_data(dataset, measure, algo): # median value of improvement by full recalculation
-    res = [data_improvements[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
-    if len(res) == 0:
+    valid_runs = len([i for i in data_iterations[dataset][measure][algo + '-full_long'] if i > 0])
+    res = [data_time[dataset][measure][algo + '-full_long'][i] for i in range(10) if
+           data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
+    if valid_runs == 0:
         return '---'
-    return '{:.3g}'.format(stdev(res))
+    max_time = 25 * 60 if algo != 'evo_one_four' else 25 * 60 * 4
+    successful_runs = len([i for i in res if i <= max_time])
+    if successful_runs == 0:
+        return 'unknown'
+    r = successful_runs / valid_runs
+    e_s = mean([i for i in res if i <= max_time])
+    e = e_s + (1 - r) / r * max_time
+    d_s = 0 if successful_runs == 1 else stdev([i for i in res if i <= max_time])
+    d = sqrt(e_s ** 2 - e ** 2 + d_s ** 2 + (1 - r ) / r * (max_time ** 2 + 2 * max_time * e))
+    return '${:.3g}$'.format(d / 60)
 
 
 def percent_success_data(dataset, measure, algo): # median value of improvement by full recalculation
-    res = [data_improvements[dataset][measure][algo + '-full_long'][i] for i in range(10) if data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
-    if len(res) == 0:
+    valid_runs = len([i for i in data_iterations[dataset][measure][algo + '-full_long'] if i > 0])
+    res = [data_time[dataset][measure][algo + '-full_long'][i] for i in range(10) if
+           data_iterations[dataset][measure][algo + '-full_long'][i] != 0]
+    if valid_runs == 0:
         return '---'
-    return '{:.3g}'.format(stdev(res))
+    max_time = 25 * 60 if algo != 'evo_one_four' else 25 * 60 * 4
+    successful_runs = len([i for i in res if i <= max_time])
+    return '{}/{}'.format(successful_runs, valid_runs)
 
 
 def print_table():
     # unsuccessful_settings = ((dataset, measure) for dataset in data_improvements for measure in data_improvements[dataset] if not is_successful(dataset, measure))
     # for i in unsuccessful_settings:
     #     print(i)
-    s = '''\\begin{tabular}{|c|c|rr|rr|rr|rr|}
+    s = '''\\begin{tabular}{|c|c|rr|rr|rr|}
   \\hline
-  \\multirow{2}{*}{Dataset} & \\multirow{2}{*}{Measure} & \\multicolumn{2}{c|}{Median} & \\multicolumn{2}{c|}{Mean} & \\multicolumn{2}{c|}{Deviation} & \\multicolumn{2}{c|}{\\% of successful runs} \\\\ \\cline{3-10}
-  & & $(1 + 1)$ & $(1 + 4)$ & $(1 + 1)$ & $(1 + 4)$ & $(1 + 1)$ & $(1 + 4)$ & $(1 + 1)$ & $(1 + 4)$  \\\\ \\hline
+  \\multirow{2}{*}{Dataset} & \\multirow{2}{*}{Measure} & \\multicolumn{2}{c|}{Mean, min} & \\multicolumn{2}{c|}{Deviation, min} & \\multicolumn{2}{c|}{Successful runs} \\\\ \\cline{3-8}
+  & & $(1 + 1)$ & $(1 + 4)$ & $(1 + 1)$ & $(1 + 4)$ & $(1 + 1)$ & $(1 + 4)$  \\\\ \\hline
 '''
     for dataset in data_improvements:
-        s += '  \\parbox[t]{{2mm}}{{\multirow{{3}}{{*}}{{\\rotatebox[origin=c]{{90}}{{{}}}}}}}'.format(dataset.replace('_', '\\_'))
+        # s += '  \\parbox[t]{{2mm}}{{\multirow{{3}}{{*}}{{\\rotatebox[origin=c]{{90}}{{{}}}}}}}'.format(dataset.replace('_', '\\_'))
+        s += '  \multirow{{3}}{{*}}{{{}}}'.format(dataset.replace('_', '\\_'))
         for measure in sorted(list(data_improvements[dataset])):
-            s += ' & {} & '.format(measure_shortname[measure])
-            s += ' & '.join([median_data(dataset, measure, algo) for algo in algo_ids if 'evo' in algo])
-            s += ' & '
+            s += ' & {} & '.format(measure.replace('_', '\\_'))
+            # s += ' & '.join([median_data(dataset, measure, algo) for algo in algo_ids if 'evo' in algo])
+            # s += ' & '
             s += ' & '.join([mean_data(dataset, measure, algo) for algo in algo_ids if 'evo' in algo])
             s += ' & '
             s += ' & '.join([deviation_data(dataset, measure, algo) for algo in algo_ids if 'evo' in algo])
@@ -289,6 +314,26 @@ def print_table():
         s += '\\hline\n'
     return s + '\end{tabular}\n'
 
+print(data_time['glass']['silhouette']['evo_one_four-full_long'])
+print(data_iterations['glass']['silhouette']['evo_one_four-full_long'])
+# def check():
+#     for dataset in data_improvements:
+#         for measure in data_improvements[dataset]:
+#             for algo in algo_ids:
+#                 iterative_has_improved = sum(data_improvements[dataset][measure][algo + '-iterative']) > 0
+#                 full_recalcuation_did_nothing = len([i for i in data_iterations[dataset][measure][algo + '-full_long'] if i == 0]) > 0
+#                 if iterative_has_improved and full_recalcuation_did_nothing:
+#                     print(dataset, measure, algo)
+#
+# for dataset in data_time:
+#     for measure in data_time[dataset]:
+#         for algo in algo_ids:
+#             if len([i for i in data_time[dataset][measure][algo + '-full_long'] if i > 25 * 60]) == 10 and algo != 'evo_one_four' or \
+#                len([i for i in data_time[dataset][measure][algo + '-full_long'] if i > 25 * 60 * 4]) == 10:
+#                 print(dataset, measure, algo, data_time[dataset][measure][algo + '-full_long'])
+#
+# # check()
+# exit(0)
 
 with open('tables/improvement-table.tex', 'w') as f:
     f.write(print_table())
