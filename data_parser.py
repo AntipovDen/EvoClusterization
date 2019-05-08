@@ -254,10 +254,12 @@ def mean_data(dataset, measure, algo): # median value of improvement by full rec
     max_time = 25 * 60 if algo != 'evo_one_four' else 25 * 60 * 4
     successful_runs = len([i for i in res if i <= max_time])
     if successful_runs == 0:
-        return '$>{}$'.format(max_time // 60)
+        return '$>25$'
     r = successful_runs / valid_runs
     m = mean([i for i in res if i <= max_time]) + (1 - r) / r * max_time
-    return '${:.3g}$'.format(m / 60)
+    if m < max_time / 5:
+        return '\\cellcolor{{blue!25}}${:.3g}$'.format(m / max_time * 25)
+    return '${:.3g}$'.format(m / max_time * 25)
 
 
 def deviation_data(dataset, measure, algo): # median value of improvement by full recalculation
@@ -275,7 +277,7 @@ def deviation_data(dataset, measure, algo): # median value of improvement by ful
     e = e_s + (1 - r) / r * max_time
     d_s = 0 if successful_runs == 1 else stdev([i for i in res if i <= max_time])
     d = sqrt(e_s ** 2 - e ** 2 + d_s ** 2 + (1 - r ) / r * (max_time ** 2 + 2 * max_time * e))
-    return '${:.3g}$'.format(d / 60)
+    return '${:.3g}$'.format(d / max_time * 25)
 
 
 def percent_success_data(dataset, measure, algo): # median value of improvement by full recalculation
@@ -314,40 +316,6 @@ def print_table():
         s += '\\hline\n'
     return s + '\end{tabular}\n'
 
-print(data_time['glass']['silhouette']['evo_one_four-full_long'])
-print(data_iterations['glass']['silhouette']['evo_one_four-full_long'])
-# def check():
-#     for dataset in data_improvements:
-#         for measure in data_improvements[dataset]:
-#             for algo in algo_ids:
-#                 iterative_has_improved = sum(data_improvements[dataset][measure][algo + '-iterative']) > 0
-#                 full_recalcuation_did_nothing = len([i for i in data_iterations[dataset][measure][algo + '-full_long'] if i == 0]) > 0
-#                 if iterative_has_improved and full_recalcuation_did_nothing:
-#                     print(dataset, measure, algo)
-#
-# for dataset in data_time:
-#     for measure in data_time[dataset]:
-#         for algo in algo_ids:
-#             if len([i for i in data_time[dataset][measure][algo + '-full_long'] if i > 25 * 60]) == 10 and algo != 'evo_one_four' or \
-#                len([i for i in data_time[dataset][measure][algo + '-full_long'] if i > 25 * 60 * 4]) == 10:
-#                 print(dataset, measure, algo, data_time[dataset][measure][algo + '-full_long'])
-#
-# # check()
-# exit(0)
 
 with open('tables/improvement-table.tex', 'w') as f:
     f.write(print_table())
-# measures = list(data_improvements[list(data_improvements.keys())[0]].keys())
-# for measure in measures:
-#     with open('plots/measure_{}.tex'.format(measure), 'w') as f:
-#         f.write(print_boxplot_imrovement(measure))
-#
-# for dataset in data_iterations:
-#     for measure in data_iterations[dataset]:
-#         with open('plots/iters-{}-{}.tex'.format(dataset, measure), 'w') as f:
-#             f.write(print_boxplot_iterations(dataset, measure))
-#
-# for dataset in data_time:
-#     for measure in data_time[dataset]:
-#         with open('plots/times-{}-{}.tex'.format(dataset, measure), 'w') as f:
-#             f.write(print_boxplot_time(dataset, measure))
